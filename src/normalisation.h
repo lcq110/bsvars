@@ -2,7 +2,7 @@
 #ifndef _NORMALISATION_H_
 #define _NORMALISATION_H_
 
-#include <RcppArmadillo.h>
+#include "bsvars_RcppArmadillo.h"
 
 arma::rowvec normalisation_wz2003_s (
     const arma::mat& B,                   // NxN

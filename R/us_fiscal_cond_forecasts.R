@@ -6,7 +6,7 @@
 #' endogenous variables, namely government spending and GDP, will be forecasted
 #' given the provided projected values of total tax revenue. The matrix includes 
 #' future values for the forecast horizon of two years for the US fiscal model 
-#' for the period 2024 Q3 -- 2026 Q1.
+#' for the period 2026 Q2 -- 2028 Q1.
 #'
 #' @description Conditional projections variables to be used in conditional 
 #' forecasting of government spending and GDP given the provided projected 

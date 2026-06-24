@@ -2,7 +2,7 @@
 #ifndef _MSH_H_
 #define _MSH_H_
 
-#include <RcppArmadillo.h>
+#include "bsvars_RcppArmadillo.h"
 
 
 

@@ -2,7 +2,7 @@
 #ifndef _SAMPLE_ABHYPER_H_
 #define _SAMPLE_ABHYPER_H_
 
-#include <RcppArmadillo.h>
+#include "bsvars_RcppArmadillo.h"
 
 
 arma::mat sample_A_homosk1 (

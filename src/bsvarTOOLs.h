@@ -2,7 +2,7 @@
 #ifndef _BSVARTOOLS_H_
 #define _BSVARTOOLS_H_
 
-#include <RcppArmadillo.h>
+#include "bsvars_RcppArmadillo.h"
 
 
 arma::cube bsvars_ir1 (

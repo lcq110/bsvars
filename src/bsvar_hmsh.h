@@ -2,7 +2,7 @@
 #ifndef _BSVAR_HMSH_H_
 #define _BSVAR_HMSH_H_
 
-#include <RcppArmadillo.h>
+#include "bsvars_RcppArmadillo.h"
 
 
 Rcpp::List bsvar_hmsh_cpp (

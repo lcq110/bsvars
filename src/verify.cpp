@@ -1,4 +1,4 @@
-#include <RcppArmadillo.h>
+#include "bsvars_RcppArmadillo.h"
 #include "Rcpp/Rmath.h"
 
 #include "utils.h"

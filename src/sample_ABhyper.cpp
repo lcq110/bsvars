@@ -1,6 +1,6 @@
 
 
-#include <RcppArmadillo.h>
+#include "bsvars_RcppArmadillo.h"
 #include "progress.hpp"
 #include "Rcpp/Rmath.h"
 

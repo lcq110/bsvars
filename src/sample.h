@@ -2,7 +2,7 @@
 #ifndef _SAMPLE_H_
 #define _SAMPLE_H_
 
-#include <RcppArmadillo.h>
+#include "bsvars_RcppArmadillo.h"
 
 
 int csample_num1 (

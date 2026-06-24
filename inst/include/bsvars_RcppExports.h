@@ -4,7 +4,7 @@
 #ifndef RCPP_bsvars_RCPPEXPORTS_H_GEN_
 #define RCPP_bsvars_RCPPEXPORTS_H_GEN_
 
-#include <RcppArmadillo.h>
+#include "bsvars_RcppArmadillo.h"
 #include <Rcpp.h>
 
 namespace bsvars {

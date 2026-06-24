@@ -2,7 +2,7 @@
 #ifndef _SAMPLE_T_H_
 #define _SAMPLE_T_H_
 
-#include <RcppArmadillo.h>
+#include "bsvars_RcppArmadillo.h"
 
 
 arma::mat sample_lambda (

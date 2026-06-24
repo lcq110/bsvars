@@ -2,7 +2,7 @@
 #ifndef _SV_H_
 #define _SV_H_
 
-#include <RcppArmadillo.h>
+#include "bsvars_RcppArmadillo.h"
 
 double do_rgig1(
     double lambda, 
