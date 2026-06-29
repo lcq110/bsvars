@@ -1,5 +1,5 @@
 
-#include "bsvars_RcppArmadillo.h"
+#include <RcppArmadillo.h>
 #include "sample.h"
 
 using namespace Rcpp;

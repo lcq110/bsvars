@@ -2,7 +2,7 @@
 #ifndef _VERIFY_H_
 #define _VERIFY_H_
 
-#include "bsvars_RcppArmadillo.h"
+#include <RcppArmadillo.h>
 
 
 Rcpp::List verify_volatility_sv_cpp (

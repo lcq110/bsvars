@@ -2,7 +2,7 @@
 #ifndef _BSVAR_H_
 #define _BSVAR_H_
 
-#include "bsvars_RcppArmadillo.h"
+#include <RcppArmadillo.h>
 
 Rcpp::List bsvar_cpp(
     const int&  S,                        // number of draws from the posterior

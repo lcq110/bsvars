@@ -2,7 +2,7 @@
 #ifndef _FORECAST_H_
 #define _FORECAST_H_
 
-#include "bsvars_RcppArmadillo.h"
+#include <RcppArmadillo.h>
 
 
 arma::vec mvnrnd_cond (

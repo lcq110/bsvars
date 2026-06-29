@@ -2,7 +2,7 @@
 #ifndef _BSVAR_EXH_H_
 #define _BSVAR_EXH_H_
 
-#include "bsvars_RcppArmadillo.h"
+#include <RcppArmadillo.h>
 
 
 Rcpp::List bsvar_exh_cpp (

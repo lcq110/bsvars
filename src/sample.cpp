@@ -1,6 +1,6 @@
 
-#include "bsvars_RcppArmadilloExtensions_sample.h"
-#include "bsvars_RcppArmadillo.h"
+#include <RcppArmadilloExtensions/sample.h>
+#include <RcppArmadillo.h>
 #include "Rcpp/Rmath.h"
 
 #include "utils.h"
@@ -12,7 +12,7 @@ using namespace arma;
 // a transformed sample implementation taken from Rcpp Gallery:
 // https://gallery.rcpp.org/articles/using-the-Rcpp-based-sample-implementation/
 // fixed to one draw, sampling without replacement, and changed output type to int
-// IMPORTANT: always #include "bsvars_RcppArmadilloExtensions_sample.h"
+// IMPORTANT: always #include <RcppArmadilloExtensions/sample.h>
 //---------------------------------------------------------------------------------------------------
 // [[Rcpp::interfaces(cpp)]]
 // [[Rcpp::export]]
