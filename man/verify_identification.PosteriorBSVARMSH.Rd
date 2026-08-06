@@ -15,7 +15,7 @@ An object of class \code{SDDRid*} that is a list with components:
 
 \code{logSDDR} a vector with values of the logarithm of the Bayes factors
 
-\code{log_SDDR_se} a vector with numerical standard errors of the logarithm of 
+\code{logSDDR_se} a vector with numerical standard errors of the logarithm of
 the Bayes factors reported in output element \code{logSDDR} that are computed 
 based on 30 random sub-samples of the log-ordinates of the marginal posterior 
 and prior distributions.
