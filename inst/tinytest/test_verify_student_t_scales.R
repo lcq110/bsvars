@@ -123,17 +123,18 @@ prior_ar <- list(
   A_V_inv     = matrix(1, K, K)
 )
 hypothesis <- matrix(0, N, K)
+VA_all_free <- list(matrix(1, N, K))
 
 out_ar <- .Call(
   "_bsvars_verify_autoregressive_heterosk_cpp",
-  hypothesis, posterior_ar, prior_ar, Y, X,
+  hypothesis, posterior_ar, prior_ar, VA_all_free, Y, X,
   PACKAGE = "bsvars"
 )
 posterior_ar$sigma  <- sigma * sqrt(lambda)
 posterior_ar$lambda <- lambda1
 out_ar_reference <- .Call(
   "_bsvars_verify_autoregressive_heterosk_cpp",
-  hypothesis, posterior_ar, prior_ar, Y, X,
+  hypothesis, posterior_ar, prior_ar, VA_all_free, Y, X,
   PACKAGE = "bsvars"
 )
 
@@ -162,7 +163,7 @@ posterior_t_reference$sigma  <- sqrt(lambda)
 posterior_t_reference$lambda <- lambda1
 out_t_reference <- .Call(
   "_bsvars_verify_autoregressive_heterosk_cpp",
-  hypothesis, posterior_t_reference, prior_ar, Y, X,
+  hypothesis, posterior_t_reference, prior_ar, VA_all_free, Y, X,
   PACKAGE = "bsvars"
 )
 
