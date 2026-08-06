@@ -123,18 +123,14 @@ Rcpp::List bsvar_sv_cpp (
     
     
     if ( !normal ) {
-      try {
-        List df_tmp     = sample_df ( aux_df, adaptive_scale, aux_lambda, s, adptive_alpha_gamma );
-        aux_df          = as<vec>(df_tmp["aux_df"]);
-        adaptive_scale  = as<vec>(df_tmp["adaptive_scale"]);
-      } catch (std::runtime_error &e) {}
+      List df_tmp     = sample_df ( aux_df, adaptive_scale, aux_lambda, s, adptive_alpha_gamma );
+      aux_df          = as<vec>(df_tmp["aux_df"]);
+      adaptive_scale  = as<vec>(df_tmp["adaptive_scale"]);
       
       U               = aux_B * (Y - aux_A * X) / aux_sigma;
-      try {
-        aux_lambda      = sample_lambda ( aux_df, U );
-        aux_lambda_sqrt = sqrt(aux_lambda);
-        aux_hetero      = aux_sigma % aux_lambda_sqrt;
-      } catch (std::runtime_error &e) {}
+      aux_lambda      = sample_lambda ( aux_df, U );
+      aux_lambda_sqrt = sqrt(aux_lambda);
+      aux_hetero      = aux_sigma % aux_lambda_sqrt;
     }
     
     // sample aux_h, aux_omega and aux_S, aux_sigma2_omega
@@ -152,13 +148,9 @@ Rcpp::List bsvar_sv_cpp (
       
       List sv_n;
       if ( centred_sv ) {
-        try {
-          sv_n            = svar_ce1( h_tmp, rho_tmp, omega_tmp, sigma2v_tmp, s2o_tmp, s_n, S_tmp, U_tmp, prior, true );
-        } catch (std::runtime_error &e) {}
+        sv_n            = svar_ce1( h_tmp, rho_tmp, omega_tmp, sigma2v_tmp, s2o_tmp, s_n, S_tmp, U_tmp, prior, true );
       } else {
-        try {
-          sv_n            = svar_nc1( h_tmp, rho_tmp, omega_tmp, sigma2v_tmp, s2o_tmp, s_n, S_tmp, U_tmp, prior, true );
-        } catch (std::runtime_error &e) {}
+        sv_n            = svar_nc1( h_tmp, rho_tmp, omega_tmp, sigma2v_tmp, s2o_tmp, s_n, S_tmp, U_tmp, prior, true );
       }
 
       aux_h.row(n)      = as<rowvec>(sv_n["aux_h_n"]);
@@ -178,19 +170,13 @@ Rcpp::List bsvar_sv_cpp (
     aux_hetero      = aux_sigma % aux_lambda_sqrt;
     
     // sample aux_hyper
-    try {
-      aux_hyper       = sample_hyperparameters( aux_hyper, aux_B, aux_A, VB, VA, prior);
-    } catch (std::runtime_error &e) {}
+    aux_hyper       = sample_hyperparameters( aux_hyper, aux_B, aux_A, VB, VA, prior);
     
     // sample aux_B
-    try {
-      aux_B           = sample_B_heterosk1(aux_B, aux_A, aux_hyper, aux_hetero, Y, X, prior, VB);
-    } catch (std::runtime_error &e) {}
+    aux_B           = sample_B_heterosk1(aux_B, aux_A, aux_hyper, aux_hetero, Y, X, prior, VB);
     
     // sample aux_A
-    try {
-      aux_A           = sample_A_heterosk1(aux_A, aux_B, aux_hyper, aux_hetero, Y, X, prior, VA);
-    } catch (std::runtime_error &e) {}
+    aux_A           = sample_A_heterosk1(aux_A, aux_B, aux_hyper, aux_hetero, Y, X, prior, VA);
     
     if (s % thin == 0) {
       posterior_B.slice(ss)          = aux_B;
@@ -243,4 +229,3 @@ Rcpp::List bsvar_sv_cpp (
     )
   );
 } // END bsvar_sv_cpp
-
