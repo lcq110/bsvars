@@ -74,6 +74,8 @@ arma::cube forecast_sigma2_msh (
       PR_ST       = trans(posterior_PR_TR.slice(s)) * PR_ST;
       St          = csample_num1(zeroM, wrap(PR_ST));
       forecasts_sigma2.slice(s).col(h) = posterior_sigma2.slice(s).col(St);
+      PR_ST.zeros();
+      PR_ST(St)   = 1.0;
       
     } // END h loop
   } // END s loop
@@ -111,6 +113,8 @@ arma::cube forecast_sigma2_hmsh (
         PR_ST       = trans(posterior_PR_TR(s).slice(n)) * PR_ST;
         St          = csample_num1(zeroM, wrap(PR_ST));
         forecasts_sigma2(n, h, s) = posterior_sigma2(n, St, s);
+        PR_ST.zeros();
+        PR_ST(St)   = 1.0;
       } // END h loop
       
     } // END n loop
@@ -236,26 +240,45 @@ Rcpp::List forecast_bsvars (
       mat   s2_diag           = diagmat(forecast_sigma2.slice(s).col(h));
       mat   Sigma             = B_inv * s2_diag * B_inv.t();
       Sigma                   = 0.5 * (Sigma + Sigma.t());
-      SigmaT.slice(h) = Sigma;
       vec   cond_forecast_h   = trans(cond_forecast.row(h));
       uvec  nonf_el           = find_nonfinite( cond_forecast_h );
       int   nonf_no           = nonf_el.n_elem;
-      out_forecast_mean.slice(s).col(h) = posterior_A.slice(s) * Xt;
+      vec   forecast_mean     = posterior_A.slice(s) * Xt;
+      mat   forecast_cov      = Sigma;
       
       if ( nonf_no == N ) {
-        try {
-          draw        = mvnrnd( out_forecast_mean.slice(s).col(h), Sigma );
-        } 
-        catch (std::logic_error &e) {break;}
-        catch (std::runtime_error &e) {break;}
+        draw          = mvnrnd(forecast_mean, Sigma);
       } else {
-        try {
-          draw        = mvnrnd_cond( cond_forecast_h, out_forecast_mean.slice(s).col(h), Sigma );   // does not work if cond_fc_h is all nan
-        } 
-        catch (std::logic_error &e) {break;}
-        catch (std::runtime_error &e) {break;}
+        uvec  finite_el          = find_finite(cond_forecast_h);
+        vec   fixed_values       = cond_forecast_h(finite_el);
+        vec   unconditional_mean = forecast_mean;
+
+        draw                    = cond_forecast_h;
+        forecast_mean           = cond_forecast_h;
+        forecast_cov.zeros();
+
+        if ( nonf_no > 0 ) {
+          vec   mean_free         = unconditional_mean(nonf_el);
+          vec   mean_fixed        = unconditional_mean(finite_el);
+          mat   covariance_free   = Sigma(nonf_el, nonf_el);
+          mat   covariance_cross  = Sigma(nonf_el, finite_el);
+          mat   covariance_fixed  = Sigma(finite_el, finite_el);
+          mat   covariance_adjustment =
+            covariance_cross * inv_sympd(covariance_fixed);
+          vec   conditional_mean  =
+            mean_free + covariance_adjustment * (fixed_values - mean_fixed);
+          mat   conditional_cov   =
+            covariance_free - covariance_adjustment * covariance_cross.t();
+
+          draw(nonf_el)           = mvnrnd(conditional_mean, conditional_cov);
+          forecast_mean(nonf_el)  = conditional_mean;
+          forecast_cov(nonf_el, nonf_el) = conditional_cov;
+        }
       } // END if nonf_no
+
       out_forecast.slice(s).col(h) = draw;
+      out_forecast_mean.slice(s).col(h) = forecast_mean;
+      SigmaT.slice(h) = forecast_cov;
       
       
       if ( h != horizon - 1 ) {
@@ -278,4 +301,3 @@ Rcpp::List forecast_bsvars (
     _["forecast_cov"]   = out_forecast_cov
   );
 } // END forecast_bsvar
-
