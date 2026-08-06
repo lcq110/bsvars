@@ -81,11 +81,11 @@ Rcpp::List verify_volatility_sv_cpp (
   vec log_numerator           = log_mean(log_numerator_s);
   
   int   nse_subsamples        = 30;
-  mat   se_components(N, nse_subsamples);
+  mat   se_components(N, nse_subsamples, fill::value(datum::nan));
   int   nn                    = floor(S/nse_subsamples);
   uvec  seq_1S                = as<uvec>(wrap(seq_len(S) - 1));
   
-  vec logSDDR_se(N);
+  vec logSDDR_se(N, fill::value(datum::nan));
   
   if ( S >= 60 ) {
     for (int i=0; i<nse_subsamples; i++) {
@@ -95,7 +95,7 @@ Rcpp::List verify_volatility_sv_cpp (
       // log denominator
       inv_sqrt_s_      = 0.0;
       if ( sample_s_ ) {
-        vec sample_prior_s_i    = prior_s_/sample_prior_s_.rows(indi);
+        vec sample_prior_s_i    = sample_prior_s_.rows(indi);
         inv_sqrt_s_             = as_scalar(mean(pow(sample_prior_s_i, -0.5)));
       } else {
         inv_sqrt_s_             = pow(prior_s_, -0.5);
@@ -223,11 +223,11 @@ Rcpp::List verify_volatility_msh_cpp (
   
   // NSE computations
   int   nse_subsamples        = 30;
-  mat   se_components(N, nse_subsamples);
+  mat   se_components(N, nse_subsamples, fill::value(datum::nan));
   int   nn                    = floor(S/nse_subsamples);
   uvec  seq_1S                = as<uvec>(wrap(seq_len(S) - 1));
   
-  vec logSDDR_se(N);
+  vec logSDDR_se(N, fill::value(datum::nan));
   
   if ( S >= 60 ) {
     for (int i=0; i<nse_subsamples; i++) {
@@ -275,7 +275,7 @@ Rcpp::List verify_volatility_hmsh_cpp (
   cube  posterior_lambda    = as<cube>(posterior["lambda"]);
   
   const int   M             = posterior_xi(0).n_rows;
-  double      MM            = posterior_xi.n_rows;
+  double      MM            = M;
   const int   N             = posterior_B.n_rows;
   const int   T             = Y.n_cols;
   const int   S             = posterior_B.n_slices;
@@ -320,11 +320,11 @@ Rcpp::List verify_volatility_hmsh_cpp (
   
   // NSE computations
   int   nse_subsamples        = 30;
-  mat   se_components(N, nse_subsamples);
+  mat   se_components(N, nse_subsamples, fill::value(datum::nan));
   int   nn                    = floor(S/nse_subsamples);
   uvec  seq_1S                = as<uvec>(wrap(seq_len(S) - 1));
   
-  vec logSDDR_se(N);
+  vec logSDDR_se(N, fill::value(datum::nan));
   
   if ( S >= 60 ) {
     for (int i=0; i<nse_subsamples; i++) {
@@ -459,11 +459,14 @@ Rcpp::List verify_autoregressive_heterosk_cpp (
   double    log_denominator = 0;
   vec       log_denominator_n(N);
   mat       log_denominator_s(N, S);
-  double    logSDDR_se = 0;
+  double    logSDDR_se = datum::nan;
   
   // for NSE computations
   int   nse_subsamples        = 30;
-  rowvec    se_components(nse_subsamples);
+  rowvec    se_components(nse_subsamples, fill::value(datum::nan));
+  if ( S >= 60 ) {
+    se_components.zeros();
+  }
   int   nn                    = floor(S/nse_subsamples);
   uvec  seq_1S                = as<uvec>(wrap(seq_len(S) - 1));
   
@@ -604,11 +607,14 @@ Rcpp::List verify_autoregressive_homosk_cpp (
   double    log_denominator = 0;
   vec       log_denominator_n(N);
   mat       log_denominator_s(N, S);
-  double    logSDDR_se = 0;
+  double    logSDDR_se = datum::nan;
   
   // for NSE computations
   int   nse_subsamples        = 30;
-  rowvec    se_components(nse_subsamples);
+  rowvec    se_components(nse_subsamples, fill::value(datum::nan));
+  if ( S >= 60 ) {
+    se_components.zeros();
+  }
   int   nn                    = floor(S/nse_subsamples);
   uvec  seq_1S                = as<uvec>(wrap(seq_len(S) - 1));
   
