@@ -84,3 +84,51 @@ expect_error(
   ),
   info = "forecast_bsvars: propagates conditional sampling failures."
 )
+
+
+# Conditional forecasts must return conditional moments.
+unconditional_covariance = matrix(c(1, 0.5, 0.5, 1), 2, 2)
+B_inverse                = t(chol(unconditional_covariance))
+
+conditional_draw = .Call(
+  "_bsvars_mvnrnd_cond",
+  c(2, NA_real_),
+  c(0, 0),
+  unconditional_covariance,
+  PACKAGE = "bsvars"
+)
+expect_equal(
+  conditional_draw[1],
+  2,
+  info = "mvnrnd_cond: retains its vector-returning public interface."
+)
+
+conditional_output       = .Call(
+  "_bsvars_forecast_bsvars",
+  array(solve(B_inverse), c(2, 2, 1)),
+  array(0, c(2, 2, 1)),
+  array(1, c(2, 1, 1)),
+  c(0, 0),
+  matrix(NA_real_, 1, 1),
+  matrix(c(2, NA_real_), 1, 2),
+  1L,
+  PACKAGE = "bsvars"
+)
+
+expect_equal(
+  conditional_output$forecasts[1, 1, 1],
+  2,
+  info = "forecast_bsvars: respects the fixed coordinate."
+)
+expect_equal(
+  conditional_output$forecast_mean[, 1, 1],
+  c(2, 1),
+  tolerance = 1e-10,
+  info = "forecast_bsvars: returns the full conditional mean."
+)
+expect_equal(
+  conditional_output$forecast_cov[[1]][, , 1],
+  matrix(c(0, 0, 0, 0.75), 2, 2),
+  tolerance = 1e-10,
+  info = "forecast_bsvars: returns the full conditional covariance."
+)
