@@ -103,3 +103,31 @@ expect_equal(
   tolerance = 1e-10,
   info = "Student-t HMSH FEVD: draw 2 includes terminal lambda."
 )
+
+
+# FEVDs must pair unstandardised responses with structural-shock variances.
+impact = matrix(c(2, 1, 1, 3), N, N)
+bsvar_posterior = list(
+  posterior = list(
+    B  = array(solve(impact), c(N, N, 1)),
+    A  = array(0, c(N, N * p + 1, 1)),
+    df = matrix(10, N, 1)
+  ),
+  last_draw = list(
+    p             = p,
+    data_matrices = list(
+      Y = matrix(0, N, 1, dimnames = list(c("y1", "y2"), "t1"))
+    ),
+    get_normal = function() TRUE
+  )
+)
+class(bsvar_posterior) = "PosteriorBSVAR"
+
+bsvar_fevd = compute_variance_decompositions(bsvar_posterior, horizon = 1)
+
+expect_equal(
+  unname(bsvar_fevd[1, , 1, 1]),
+  c(80, 20),
+  tolerance = 1e-10,
+  info = "FEVD: impact shares use unstandardised responses."
+)
