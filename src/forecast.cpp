@@ -247,17 +247,9 @@ Rcpp::List forecast_bsvars (
       out_forecast_mean.slice(s).col(h) = posterior_A.slice(s) * Xt;
       
       if ( nonf_no == N ) {
-        try {
-          draw        = mvnrnd( out_forecast_mean.slice(s).col(h), Sigma );
-        } 
-        catch (std::logic_error &e) {break;}
-        catch (std::runtime_error &e) {break;}
+        draw        = mvnrnd( out_forecast_mean.slice(s).col(h), Sigma );
       } else {
-        try {
-          draw        = mvnrnd_cond( cond_forecast_h, out_forecast_mean.slice(s).col(h), Sigma );   // does not work if cond_fc_h is all nan
-        } 
-        catch (std::logic_error &e) {break;}
-        catch (std::runtime_error &e) {break;}
+        draw        = mvnrnd_cond( cond_forecast_h, out_forecast_mean.slice(s).col(h), Sigma );   // does not work if cond_fc_h is all nan
       } // END if nonf_no
       out_forecast.slice(s).col(h) = draw;
       

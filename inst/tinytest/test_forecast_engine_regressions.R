@@ -53,3 +53,34 @@ expect_true(
   cor(hmsh_paths[1, 1, ], hmsh_paths[1, 2, ]) > 0.5,
   info = "forecast_sigma2_hmsh: preserves serial state dependence."
 )
+
+
+# Gaussian sampling failures must stop the forecast.
+expect_error(
+  .Call(
+    "_bsvars_forecast_bsvars",
+    array(1, c(1, 1, 1)),
+    array(0, c(1, 1, 1)),
+    array(-1, c(1, 1, 1)),
+    0,
+    matrix(NA_real_, 1, 1),
+    matrix(NA_real_, 1, 1),
+    1L,
+    PACKAGE = "bsvars"
+  ),
+  info = "forecast_bsvars: propagates covariance and sampling failures."
+)
+expect_error(
+  .Call(
+    "_bsvars_forecast_bsvars",
+    array(diag(2), c(2, 2, 1)),
+    array(0, c(2, 2, 1)),
+    array(c(-1, 1), c(2, 1, 1)),
+    c(0, 0),
+    matrix(NA_real_, 1, 1),
+    matrix(c(NA_real_, 0), 1, 2),
+    1L,
+    PACKAGE = "bsvars"
+  ),
+  info = "forecast_bsvars: propagates conditional sampling failures."
+)
