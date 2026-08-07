@@ -326,15 +326,15 @@ arma::field<arma::cube> bsvars_filter_forecast_smooth_hmsh (
     cube for_smo(M, T, N);
     for (int n=0; n<N; n++) {
       fp.slice(n)         = filtering_msh(
-        shocks, 
-        posterior_sigma2.slice(s), 
-        posterior_PR_TR(s).slice(n), 
+        shocks.row(n),
+        posterior_sigma2.slice(s).row(n),
+        posterior_PR_TR(s).slice(n),
         posterior_pi_0.slice(s).col(n)
       );
       if (forecasted) {
         for_smo.slice(n)      = posterior_PR_TR(s).slice(n) * fp.slice(n);
       } else if (smoothed) {
-        for_smo.slice(n)      = smoothing_msh(shocks, posterior_PR_TR(s).slice(n), fp.slice(n));
+        for_smo.slice(n)      = smoothing_msh(shocks.row(n), posterior_PR_TR(s).slice(n), fp.slice(n));
       }
     } // END n loop
     filtered_probabilities(s) = fp;
