@@ -84,30 +84,20 @@ Rcpp::List bsvar_cpp(
     
     // sample aux_df and aux_lambda
     if ( !normal ) {
-      try {
-        List df_tmp     = sample_df ( aux_df, adaptive_scale, aux_lambda, s, adptive_alpha_gamma );
-        aux_df          = as<vec>(df_tmp["aux_df"]);
-        adaptive_scale  = as<vec>(df_tmp["adaptive_scale"]);
-      } catch (std::runtime_error &e) {}
+      List df_tmp     = sample_df ( aux_df, adaptive_scale, aux_lambda, s, adptive_alpha_gamma );
+      aux_df          = as<vec>(df_tmp["aux_df"]);
+      adaptive_scale  = as<vec>(df_tmp["adaptive_scale"]);
     
-      try {
-        mat U           = aux_B * (Y - aux_A * X);
-        aux_lambda      = sample_lambda ( aux_df, U );
-        aux_lambda_sqrt = sqrt(aux_lambda);
-      } catch (std::runtime_error &e) {}
+      mat U           = aux_B * (Y - aux_A * X);
+      aux_lambda      = sample_lambda ( aux_df, U );
+      aux_lambda_sqrt = sqrt(aux_lambda);
     }
     
-    try {
-      aux_hyper     = sample_hyperparameters(aux_hyper, aux_B, aux_A, VB, VA, prior);
-    } catch (std::runtime_error &e) {}
+    aux_hyper     = sample_hyperparameters(aux_hyper, aux_B, aux_A, VB, VA, prior);
     
-    try {
-      aux_A         = sample_A_heterosk1(aux_A, aux_B, aux_hyper, aux_lambda_sqrt, Y, X, prior, VA);
-    } catch (std::runtime_error &e) {}
+    aux_A         = sample_A_heterosk1(aux_A, aux_B, aux_hyper, aux_lambda_sqrt, Y, X, prior, VA);
     
-    try {
-      aux_B         = sample_B_heterosk1(aux_B, aux_A, aux_hyper, aux_lambda_sqrt, Y, X, prior, VB);
-    } catch (std::runtime_error &e) {}
+    aux_B         = sample_B_heterosk1(aux_B, aux_A, aux_hyper, aux_lambda_sqrt, Y, X, prior, VB);
     
     if (s % thin == 0) {
       posterior_B.slice(ss)    = aux_B;
