@@ -67,3 +67,22 @@ expect_equal(
   tolerance = 1e-12,
   info = "find_mixture_indicator_cdf: CDF matches normalized Gaussian mixture weights."
 )
+
+
+# B05: the centred measurement residual subtracts h, not omega * h.
+h <- c(0.1, -0.2, 0.3, -0.1, 0.2)
+u <- c(0.8, 1.2, 0.7, 1.5, 1.1)
+measurement <- log((u + 1e-9)^2)
+
+set.seed(1)
+expected_indicators <- .sv_mixture_indicators(
+  .sv_mixture_cdf(measurement - h),
+  length(h)
+)
+centred_draw <- .centred_sv_draw(1, h, u)
+
+expect_identical(
+  as.integer(centred_draw$aux_S_n),
+  as.integer(expected_indicators),
+  info = "svar_ce1: mixture indicators use the centred log-volatility state."
+)
