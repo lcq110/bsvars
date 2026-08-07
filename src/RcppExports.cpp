@@ -2346,24 +2346,25 @@ RcppExport SEXP _bsvars_dmvnorm_mean_var(SEXP xSEXP, SEXP meanSEXP, SEXP varSEXP
     return rcpp_result_gen;
 }
 // verify_autoregressive_heterosk_cpp
-Rcpp::List verify_autoregressive_heterosk_cpp(const arma::mat& hypothesis, const Rcpp::List& posterior, const Rcpp::List& prior, const arma::mat& Y, const arma::mat& X);
-static SEXP _bsvars_verify_autoregressive_heterosk_cpp_try(SEXP hypothesisSEXP, SEXP posteriorSEXP, SEXP priorSEXP, SEXP YSEXP, SEXP XSEXP) {
+Rcpp::List verify_autoregressive_heterosk_cpp(const arma::mat& hypothesis, const Rcpp::List& posterior, const Rcpp::List& prior, const arma::field<arma::mat>& VA, const arma::mat& Y, const arma::mat& X);
+static SEXP _bsvars_verify_autoregressive_heterosk_cpp_try(SEXP hypothesisSEXP, SEXP posteriorSEXP, SEXP priorSEXP, SEXP VASEXP, SEXP YSEXP, SEXP XSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type hypothesis(hypothesisSEXP);
     Rcpp::traits::input_parameter< const Rcpp::List& >::type posterior(posteriorSEXP);
     Rcpp::traits::input_parameter< const Rcpp::List& >::type prior(priorSEXP);
+    Rcpp::traits::input_parameter< const arma::field<arma::mat>& >::type VA(VASEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type Y(YSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
-    rcpp_result_gen = Rcpp::wrap(verify_autoregressive_heterosk_cpp(hypothesis, posterior, prior, Y, X));
+    rcpp_result_gen = Rcpp::wrap(verify_autoregressive_heterosk_cpp(hypothesis, posterior, prior, VA, Y, X));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _bsvars_verify_autoregressive_heterosk_cpp(SEXP hypothesisSEXP, SEXP posteriorSEXP, SEXP priorSEXP, SEXP YSEXP, SEXP XSEXP) {
+RcppExport SEXP _bsvars_verify_autoregressive_heterosk_cpp(SEXP hypothesisSEXP, SEXP posteriorSEXP, SEXP priorSEXP, SEXP VASEXP, SEXP YSEXP, SEXP XSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_bsvars_verify_autoregressive_heterosk_cpp_try(hypothesisSEXP, posteriorSEXP, priorSEXP, YSEXP, XSEXP));
+        rcpp_result_gen = PROTECT(_bsvars_verify_autoregressive_heterosk_cpp_try(hypothesisSEXP, posteriorSEXP, priorSEXP, VASEXP, YSEXP, XSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -2384,24 +2385,25 @@ RcppExport SEXP _bsvars_verify_autoregressive_heterosk_cpp(SEXP hypothesisSEXP, 
     return rcpp_result_gen;
 }
 // verify_autoregressive_homosk_cpp
-Rcpp::List verify_autoregressive_homosk_cpp(const arma::mat& hypothesis, const Rcpp::List& posterior, const Rcpp::List& prior, const arma::mat& Y, const arma::mat& X);
-static SEXP _bsvars_verify_autoregressive_homosk_cpp_try(SEXP hypothesisSEXP, SEXP posteriorSEXP, SEXP priorSEXP, SEXP YSEXP, SEXP XSEXP) {
+Rcpp::List verify_autoregressive_homosk_cpp(const arma::mat& hypothesis, const Rcpp::List& posterior, const Rcpp::List& prior, const arma::field<arma::mat>& VA, const arma::mat& Y, const arma::mat& X);
+static SEXP _bsvars_verify_autoregressive_homosk_cpp_try(SEXP hypothesisSEXP, SEXP posteriorSEXP, SEXP priorSEXP, SEXP VASEXP, SEXP YSEXP, SEXP XSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type hypothesis(hypothesisSEXP);
     Rcpp::traits::input_parameter< const Rcpp::List& >::type posterior(posteriorSEXP);
     Rcpp::traits::input_parameter< const Rcpp::List& >::type prior(priorSEXP);
+    Rcpp::traits::input_parameter< const arma::field<arma::mat>& >::type VA(VASEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type Y(YSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
-    rcpp_result_gen = Rcpp::wrap(verify_autoregressive_homosk_cpp(hypothesis, posterior, prior, Y, X));
+    rcpp_result_gen = Rcpp::wrap(verify_autoregressive_homosk_cpp(hypothesis, posterior, prior, VA, Y, X));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _bsvars_verify_autoregressive_homosk_cpp(SEXP hypothesisSEXP, SEXP posteriorSEXP, SEXP priorSEXP, SEXP YSEXP, SEXP XSEXP) {
+RcppExport SEXP _bsvars_verify_autoregressive_homosk_cpp(SEXP hypothesisSEXP, SEXP posteriorSEXP, SEXP priorSEXP, SEXP VASEXP, SEXP YSEXP, SEXP XSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_bsvars_verify_autoregressive_homosk_cpp_try(hypothesisSEXP, posteriorSEXP, priorSEXP, YSEXP, XSEXP));
+        rcpp_result_gen = PROTECT(_bsvars_verify_autoregressive_homosk_cpp_try(hypothesisSEXP, posteriorSEXP, priorSEXP, VASEXP, YSEXP, XSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -2488,8 +2490,8 @@ static int _bsvars_RcppExport_validate(const char* sig) {
         signatures.insert("Rcpp::List(*verify_volatility_hmsh_cpp)(const Rcpp::List&,const Rcpp::List&,const arma::mat&,const arma::mat&)");
         signatures.insert("double(*dmvnorm_chol_precision)(const arma::rowvec&,const arma::rowvec&,const arma::mat&,const bool)");
         signatures.insert("double(*dmvnorm_mean_var)(const arma::vec&,const arma::vec&,const arma::mat&,const bool)");
-        signatures.insert("Rcpp::List(*verify_autoregressive_heterosk_cpp)(const arma::mat&,const Rcpp::List&,const Rcpp::List&,const arma::mat&,const arma::mat&)");
-        signatures.insert("Rcpp::List(*verify_autoregressive_homosk_cpp)(const arma::mat&,const Rcpp::List&,const Rcpp::List&,const arma::mat&,const arma::mat&)");
+        signatures.insert("Rcpp::List(*verify_autoregressive_heterosk_cpp)(const arma::mat&,const Rcpp::List&,const Rcpp::List&,const arma::field<arma::mat>&,const arma::mat&,const arma::mat&)");
+        signatures.insert("Rcpp::List(*verify_autoregressive_homosk_cpp)(const arma::mat&,const Rcpp::List&,const Rcpp::List&,const arma::field<arma::mat>&,const arma::mat&,const arma::mat&)");
     }
     return signatures.find(sig) != signatures.end();
 }
@@ -2627,8 +2629,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_bsvars_verify_volatility_hmsh_cpp", (DL_FUNC) &_bsvars_verify_volatility_hmsh_cpp, 4},
     {"_bsvars_dmvnorm_chol_precision", (DL_FUNC) &_bsvars_dmvnorm_chol_precision, 4},
     {"_bsvars_dmvnorm_mean_var", (DL_FUNC) &_bsvars_dmvnorm_mean_var, 4},
-    {"_bsvars_verify_autoregressive_heterosk_cpp", (DL_FUNC) &_bsvars_verify_autoregressive_heterosk_cpp, 5},
-    {"_bsvars_verify_autoregressive_homosk_cpp", (DL_FUNC) &_bsvars_verify_autoregressive_homosk_cpp, 5},
+    {"_bsvars_verify_autoregressive_heterosk_cpp", (DL_FUNC) &_bsvars_verify_autoregressive_heterosk_cpp, 6},
+    {"_bsvars_verify_autoregressive_homosk_cpp", (DL_FUNC) &_bsvars_verify_autoregressive_homosk_cpp, 6},
     {"_bsvars_RcppExport_registerCCallable", (DL_FUNC) &_bsvars_RcppExport_registerCCallable, 0},
     {NULL, NULL, 0}
 };
