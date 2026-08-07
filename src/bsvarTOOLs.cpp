@@ -117,22 +117,13 @@ arma::field<arma::cube> bsvars_fevd_heterosk (
   
   field<cube>     fevds(S);
   cube            aux_fevds(N, N, horizon);
-  cube            tmp_fevds(N, N, horizon);
   
   for (int s=0; s<S; s++) {
     for (int h=0; h<horizon; h++) {
-      if ( h == 0) {
-        mat diag_sigma2     = diagmat(sigma2_T.col(s));
-        tmp_fevds.slice(h)  = square(posterior_irf(s).slice(h)) * diag_sigma2;
-      } else {
-        mat diag_sigma2     = diagmat(forecast_sigma2.slice(s).col(h - 1));
-        tmp_fevds.slice(h)  = square(posterior_irf(s).slice(h)) * diag_sigma2;
-      }
-      
-      for (int n=0; n<N; n++) {
-        for (int nn=0; nn<N; nn++) {
-          aux_fevds.subcube(n, nn, h, n, nn, h) = accu(tmp_fevds.subcube(n, nn, 0, n, nn, h));
-        }
+      aux_fevds.slice(h).zeros();
+      for (int j=0; j<=h; j++) {
+        vec variance = j == 0 ? sigma2_T.col(s) : forecast_sigma2.slice(s).col(j - 1);
+        aux_fevds.slice(h) += square(posterior_irf(s).slice(h - j)) * diagmat(variance);
       }
       aux_fevds.slice(h)  = diagmat(1/sum(aux_fevds.slice(h), 1)) * aux_fevds.slice(h);
     }
@@ -357,4 +348,3 @@ arma::field<arma::cube> bsvars_filter_forecast_smooth_hmsh (
   
   return out;
 } // END bsvars_filter_forecast_smooth
-
