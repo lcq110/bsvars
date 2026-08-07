@@ -75,3 +75,31 @@ expect_equal(
   tolerance = 1e-10,
   info = "HMSH FEVD: draw 2 uses draw 2's terminal states."
 )
+
+
+# Student-t HMSH impact FEVDs must include the terminal latent scale.
+student_hmsh_posterior = hmsh_posterior
+student_hmsh_posterior$posterior$sigma2[] = 1
+student_hmsh_posterior$posterior$sigma[]  = 1
+student_hmsh_posterior$posterior$lambda[, 1, 1] = c(4, 1)
+student_hmsh_posterior$posterior$lambda[, 1, 2] = c(1, 4)
+student_hmsh_posterior$last_draw$get_normal = function() FALSE
+
+set.seed(20260806)
+student_hmsh_fevd = compute_variance_decompositions(
+  student_hmsh_posterior,
+  horizon = 1
+)
+
+expect_equal(
+  unname(student_hmsh_fevd[1, , 1, 1]),
+  c(80, 20),
+  tolerance = 1e-10,
+  info = "Student-t HMSH FEVD: draw 1 includes terminal lambda."
+)
+expect_equal(
+  unname(student_hmsh_fevd[1, , 1, 2]),
+  c(20, 80),
+  tolerance = 1e-10,
+  info = "Student-t HMSH FEVD: draw 2 includes terminal lambda."
+)

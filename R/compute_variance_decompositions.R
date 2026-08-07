@@ -286,6 +286,7 @@ compute_variance_decompositions.PosteriorBSVARHMSH <- function(posterior, horizo
   posterior_irf   = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, horizon, p, TRUE)
   sigma2          = .Call(`_bsvars_forecast_sigma2_hmsh`, posterior_sigma2, posterior_PR_TR, S_T, horizon)
   if (!normal) {
+    sigma2_T        = sigma2_T * posterior$posterior$lambda[,T,]
     forecast_lambda = .Call(`_bsvars_forecast_lambda_t`, posterior_df, horizon) # END .Call
     sigma2          = sigma2 * forecast_lambda
   }
