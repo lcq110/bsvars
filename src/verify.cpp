@@ -267,7 +267,7 @@ Rcpp::List verify_volatility_hmsh_cpp (
   field<cube> posterior_xi  = as<field<cube>>(posterior["xi_cpp"]);
   
   const int   M             = posterior_xi(0).n_rows;
-  double      MM            = posterior_xi.n_rows;
+  double      MM            = M;
   const int   N             = posterior_B.n_rows;
   const int   T             = Y.n_cols;
   const int   S             = posterior_B.n_slices;
