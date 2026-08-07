@@ -278,7 +278,7 @@ arma::cube bsvars_filter_forecast_smooth (
     );
     
     if (forecasted) {
-      for_smo_probabilities.slice(s)  = posterior_PR_TR.slice(s) * filtered_probabilities.slice(s);
+      for_smo_probabilities.slice(s)  = posterior_PR_TR.slice(s).t() * filtered_probabilities.slice(s);
     } else if (smoothed) {
       for_smo_probabilities.slice(s)  = smoothing_msh(shocks, posterior_PR_TR.slice(s), filtered_probabilities.slice(s));
     }
@@ -291,6 +291,7 @@ arma::cube bsvars_filter_forecast_smooth (
   
   return out;
 } // END bsvars_filter_forecast_smooth
+
 
 
 
@@ -332,7 +333,7 @@ arma::field<arma::cube> bsvars_filter_forecast_smooth_hmsh (
         posterior_pi_0.slice(s).col(n)
       );
       if (forecasted) {
-        for_smo.slice(n)      = posterior_PR_TR(s).slice(n) * fp.slice(n);
+        for_smo.slice(n)      = posterior_PR_TR(s).slice(n).t() * fp.slice(n);
       } else if (smoothed) {
         for_smo.slice(n)      = smoothing_msh(shocks.row(n), posterior_PR_TR(s).slice(n), fp.slice(n));
       }
