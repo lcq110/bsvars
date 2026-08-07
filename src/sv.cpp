@@ -314,7 +314,7 @@ Rcpp::List svar_ce1 (
   mat           HH_rho  = H_rho.t() * H_rho;
   
   // sample auxiliary mixture states aux_S
-  const vec   mixprob   = find_mixture_indicator_cdf(trans(U - aux_omega_n*aux_h_n));
+  const vec   mixprob   = find_mixture_indicator_cdf(trans(U - aux_h_n));
   aux_S_n               = trans(inverse_transform_sampling(mixprob, T));
   
   rowvec    alpha_S(T);
