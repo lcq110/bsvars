@@ -1673,10 +1673,11 @@ summary.Forecasts = function(
   
   out       = list()
   for (n in 1:N) {
+    forecasts_n = matrix(object$forecasts[n, , ], nrow = H)
     out[[n]]    = cbind(
-      apply(object$forecasts[n,,], 1, mean),
-      apply(object$forecasts[n,,], 1, sd),
-      t(apply(object$forecasts[n,,], 1, quantile, probs = c(0.05, 0.95)))
+      apply(forecasts_n, 1, mean),
+      apply(forecasts_n, 1, sd),
+      t(apply(forecasts_n, 1, quantile, probs = c(0.05, 0.95)))
     )
     colnames(out[[n]]) = c("mean", "sd", "5% quantile", "95% quantile")
     rownames(out[[n]]) = 1:H
