@@ -873,6 +873,7 @@ verify_autoregression.PosteriorBSVAR <- function(posterior, hypothesis) {
   # get the inputs to estimation
   just_posterior  = posterior$posterior
   prior           = posterior$last_draw$prior$get_prior()
+  VA              = posterior$last_draw$identification$VA
   Y               = posterior$last_draw$data_matrices$Y
   X               = posterior$last_draw$data_matrices$X
   
@@ -880,7 +881,7 @@ verify_autoregression.PosteriorBSVAR <- function(posterior, hypothesis) {
   hypothesis_cpp[is.na(hypothesis_cpp)] = 999
   
   # estimate the SDDR
-  sddr            = .Call(`_bsvars_verify_autoregressive_homosk_cpp`, hypothesis_cpp, just_posterior, prior, Y, X)
+  sddr            = .Call(`_bsvars_verify_autoregressive_homosk_cpp`, hypothesis_cpp, just_posterior, prior, VA, Y, X)
   
   class(sddr)     = "SDDRautoregression"
   return(sddr)
@@ -918,6 +919,7 @@ verify_autoregression.PosteriorBSVARSV <- function(posterior, hypothesis) {
   # get the inputs to estimation
   just_posterior  = posterior$posterior
   prior           = posterior$last_draw$prior$get_prior()
+  VA              = posterior$last_draw$identification$VA
   Y               = posterior$last_draw$data_matrices$Y
   X               = posterior$last_draw$data_matrices$X
   
@@ -925,7 +927,7 @@ verify_autoregression.PosteriorBSVARSV <- function(posterior, hypothesis) {
   hypothesis_cpp[is.na(hypothesis_cpp)] = 999
   
   # estimate the SDDR
-  sddr            = .Call(`_bsvars_verify_autoregressive_heterosk_cpp`, hypothesis_cpp, just_posterior, prior, Y, X)
+  sddr            = .Call(`_bsvars_verify_autoregressive_heterosk_cpp`, hypothesis_cpp, just_posterior, prior, VA, Y, X)
   
   class(sddr)     = "SDDRautoregression"
   return(sddr)
@@ -963,6 +965,7 @@ verify_autoregression.PosteriorBSVARMIX <- function(posterior, hypothesis) {
   # get the inputs to estimation
   just_posterior  = posterior$posterior
   prior           = posterior$last_draw$prior$get_prior()
+  VA              = posterior$last_draw$identification$VA
   Y               = posterior$last_draw$data_matrices$Y
   X               = posterior$last_draw$data_matrices$X
   
@@ -970,7 +973,7 @@ verify_autoregression.PosteriorBSVARMIX <- function(posterior, hypothesis) {
   hypothesis_cpp[is.na(hypothesis_cpp)] = 999
   
   # estimate the SDDR
-  sddr            = .Call(`_bsvars_verify_autoregressive_heterosk_cpp`, hypothesis_cpp, just_posterior, prior, Y, X)
+  sddr            = .Call(`_bsvars_verify_autoregressive_heterosk_cpp`, hypothesis_cpp, just_posterior, prior, VA, Y, X)
   
   class(sddr)     = "SDDRautoregression"
   return(sddr)
@@ -1010,6 +1013,7 @@ verify_autoregression.PosteriorBSVAREXH <- function(posterior, hypothesis) {
   # get the inputs to estimation
   just_posterior  = posterior$posterior
   prior           = posterior$last_draw$prior$get_prior()
+  VA              = posterior$last_draw$identification$VA
   Y               = posterior$last_draw$data_matrices$Y
   X               = posterior$last_draw$data_matrices$X
   
@@ -1017,7 +1021,7 @@ verify_autoregression.PosteriorBSVAREXH <- function(posterior, hypothesis) {
   hypothesis_cpp[is.na(hypothesis_cpp)] = 999
   
   # estimate the SDDR
-  sddr            = .Call(`_bsvars_verify_autoregressive_heterosk_cpp`, hypothesis_cpp, just_posterior, prior, Y, X)
+  sddr            = .Call(`_bsvars_verify_autoregressive_heterosk_cpp`, hypothesis_cpp, just_posterior, prior, VA, Y, X)
   
   class(sddr)     = "SDDRautoregression"
   return(sddr)
@@ -1062,6 +1066,7 @@ verify_autoregression.PosteriorBSVARMSH <- function(posterior, hypothesis) {
   # get the inputs to estimation
   just_posterior  = posterior$posterior
   prior           = posterior$last_draw$prior$get_prior()
+  VA              = posterior$last_draw$identification$VA
   Y               = posterior$last_draw$data_matrices$Y
   X               = posterior$last_draw$data_matrices$X
   
@@ -1069,7 +1074,7 @@ verify_autoregression.PosteriorBSVARMSH <- function(posterior, hypothesis) {
   hypothesis_cpp[is.na(hypothesis_cpp)] = 999
   
   # estimate the SDDR
-  sddr            = .Call(`_bsvars_verify_autoregressive_heterosk_cpp`, hypothesis_cpp, just_posterior, prior, Y, X)
+  sddr            = .Call(`_bsvars_verify_autoregressive_heterosk_cpp`, hypothesis_cpp, just_posterior, prior, VA, Y, X)
   
   class(sddr)     = "SDDRautoregression"
   return(sddr)
@@ -1110,6 +1115,7 @@ verify_autoregression.PosteriorBSVARHMSH <- function(posterior, hypothesis) {
   # get the inputs to estimation
   just_posterior  = posterior$posterior
   prior           = posterior$last_draw$prior$get_prior()
+  VA              = posterior$last_draw$identification$VA
   Y               = posterior$last_draw$data_matrices$Y
   X               = posterior$last_draw$data_matrices$X
   
@@ -1117,7 +1123,7 @@ verify_autoregression.PosteriorBSVARHMSH <- function(posterior, hypothesis) {
   hypothesis_cpp[is.na(hypothesis_cpp)] = 999
   
   # estimate the SDDR
-  sddr            = .Call(`_bsvars_verify_autoregressive_heterosk_cpp`, hypothesis_cpp, just_posterior, prior, Y, X)
+  sddr            = .Call(`_bsvars_verify_autoregressive_heterosk_cpp`, hypothesis_cpp, just_posterior, prior, VA, Y, X)
   
   class(sddr)     = "SDDRautoregression"
   return(sddr)
@@ -1158,6 +1164,7 @@ verify_autoregression.PosteriorBSVART <- function(posterior, hypothesis) {
   # get the inputs to estimation
   just_posterior  = posterior$posterior
   prior           = posterior$last_draw$prior$get_prior()
+  VA              = posterior$last_draw$identification$VA
   Y               = posterior$last_draw$data_matrices$Y
   X               = posterior$last_draw$data_matrices$X
 
@@ -1167,7 +1174,7 @@ verify_autoregression.PosteriorBSVART <- function(posterior, hypothesis) {
   hypothesis_cpp[is.na(hypothesis_cpp)] = 999
   
   # estimate the SDDR
-  sddr            = .Call(`_bsvars_verify_autoregressive_heterosk_cpp`, hypothesis_cpp, just_posterior, prior, Y, X)
+  sddr            = .Call(`_bsvars_verify_autoregressive_heterosk_cpp`, hypothesis_cpp, just_posterior, prior, VA, Y, X)
   
   class(sddr)     = "SDDRautoregression"
   return(sddr)
@@ -1665,4 +1672,3 @@ verify_identification.PosteriorBSVART <- function(posterior) {
   class(out)      = "SDDRidT"
   return(out)
 }
-

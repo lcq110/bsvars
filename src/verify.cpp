@@ -413,6 +413,7 @@ Rcpp::List verify_autoregressive_heterosk_cpp (
     const arma::mat&        hypothesis, // an NxK matrix of values under the null; value 999 stands for not verivied
     const Rcpp::List&       posterior,  // a list of posteriors
     const Rcpp::List&       prior,      // a list of priors - original dimensions
+    const arma::field<arma::mat>& VA,   // restrictions on A
     const arma::mat&        Y,          // NxT dependent variables
     const arma::mat&        X           // KxT explanatory variables
 ) {
@@ -427,14 +428,10 @@ Rcpp::List verify_autoregressive_heterosk_cpp (
   double  prior_hyper_s_AA    = as<double>(prior["hyper_s_AA"]);
   double  prior_hyper_nu_AA   = as<double>(prior["hyper_nu_AA"]);
   
-  mat     prior_A             = as<mat>(prior["A"]);
-  mat     prior_A_V_inv       = as<mat>(prior["A_V_inv"]);
-  
   const int N                 = posterior_A.n_rows;
   const int K                 = posterior_A.n_cols;
   const int S                 = posterior_A.n_slices;
   const int T                 = Y.n_cols;
-  const double log2pi         = std::log(2.0 * M_PI);
   
   mat aux_sigma(N, T, fill::ones);
   
@@ -464,10 +461,19 @@ Rcpp::List verify_autoregressive_heterosk_cpp (
   for (int n=0; n<N; n++) {
 
     // investigate hypothesis
-    uvec  indi                = find( hypothesis.row(n) != 999 );
+    const mat&    VA_n              = VA(n);
+    const rowvec  hypothesis_n      = hypothesis.row(n) * VA_n.t();
+    const uvec    indi              = find( hypothesis_n != 999 );
     if ( indi.n_elem == 0 ) {
       continue;
     }
+
+    const mat prior_precision       = VA_n * prior_A_Vinv * VA_n.t();
+    const mat prior_variance        = inv_sympd(prior_precision);
+    const vec prior_mean            = prior_variance * trans(prior_A_mean.row(n) * prior_A_Vinv * VA_n.t());
+    const vec hypothesisn           = hypothesis_n.t();
+    const vec prior_mean_marg       = prior_mean.rows(indi);
+    const mat prior_variance_marg   = prior_variance.submat(indi, indi);
           
     for (int s=0; s<S; s++) {
       
@@ -475,12 +481,15 @@ Rcpp::List verify_autoregressive_heterosk_cpp (
       double gamma_draw       = randg( distr_param(prior_hyper_a_A, hyper_sample(2 * N, s)) );
       hyper_sample(N + n, s)  = gamma_draw;
       hyper_sample(n, s)      = gamma_draw / chi2rnd( prior_hyper_nu_A );
+
+      mat prior_variance_draw = hyper_sample(n, s) * prior_variance_marg;
       
-      double const_prior      = - 0.5 * indi.n_elem * ( log2pi + log(hyper_sample(n, s)) );
-      rowvec hypothesis_n     = hypothesis.row(n) - prior_A.row(n);
-      double kernel_prior     = - 0.5 * pow(hyper_sample(n, s), -1) * accu( pow( hypothesis_n.cols(indi), 2)  );
-      
-      log_denominator_s(n, s) = const_prior + kernel_prior;
+      log_denominator_s(n, s) = dmvnorm_mean_var(
+        hypothesisn.rows(indi),
+        prior_mean_marg,
+        prior_variance_draw,
+        true
+      );
       
       // compute numerator
       aux_sigma               = posterior_sigma.slice(s);
@@ -496,11 +505,12 @@ Rcpp::List verify_autoregressive_heterosk_cpp (
       mat     precision_tmp   = (pow(posterior_hyper(n,1,s), -1) * prior_A_Vinv) + trans(Wn_sigma) * Wn_sigma;
       precision_tmp           = 0.5 * (precision_tmp + precision_tmp.t());
       rowvec  location_tmp    = prior_A_mean.row(n) * (pow(posterior_hyper(n,1,s), -1) * prior_A_Vinv) + trans(zn_sigma) * Wn_sigma;
-      mat     variance_tmp    = inv_sympd(precision_tmp);
-      vec     mean_tmp        = variance_tmp * location_tmp.t();
-      mat     variance_marg   = variance_tmp.submat(indi, indi);
-      vec     mean_marg       = mean_tmp.rows(indi);
-      vec     hypothesisn     = trans(hypothesis.row(n));
+      mat     precision_free  = VA_n * precision_tmp * VA_n.t();
+      rowvec  location_free   = location_tmp * VA_n.t();
+      mat     variance_free   = inv_sympd(precision_free);
+      vec     mean_free       = variance_free * location_free.t();
+      mat     variance_marg   = variance_free.submat(indi, indi);
+      vec     mean_marg       = mean_free.rows(indi);
       
       log_numerator_s(n,s)    = dmvnorm_mean_var( hypothesisn.rows(indi), mean_marg, variance_marg, true );
     } // END s loop
@@ -552,6 +562,7 @@ Rcpp::List verify_autoregressive_homosk_cpp (
     const arma::mat&        hypothesis, // an NxK matrix of values under the null; value 999 stands for not verivied
     const Rcpp::List&       posterior,  // a list of posteriors
     const Rcpp::List&       prior,      // a list of priors - original dimensions
+    const arma::field<arma::mat>& VA,   // restrictions on A
     const arma::mat&        Y,          // NxT dependent variables
     const arma::mat&        X           // KxT explanatory variables
 ) {
@@ -565,13 +576,9 @@ Rcpp::List verify_autoregressive_homosk_cpp (
   double  prior_hyper_s_AA    = as<double>(prior["hyper_s_AA"]);
   double  prior_hyper_nu_AA   = as<double>(prior["hyper_nu_AA"]);
   
-  mat     prior_A             = as<mat>(prior["A"]);
-  mat     prior_A_V_inv       = as<mat>(prior["A_V_inv"]);
-  
   const int N                 = posterior_A.n_rows;
   const int K                 = posterior_A.n_cols;
   const int S                 = posterior_A.n_slices;
-  const double log2pi         = std::log(2.0 * M_PI);
   
   mat prior_A_mean            = as<mat>(prior["A"]);
   mat prior_A_Vinv            = as<mat>(prior["A_V_inv"]);
@@ -599,10 +606,19 @@ Rcpp::List verify_autoregressive_homosk_cpp (
   for (int n=0; n<N; n++) {
     
     // investigate hypothesis
-    uvec  indi                = find( hypothesis.row(n) != 999 );
+    const mat&    VA_n              = VA(n);
+    const rowvec  hypothesis_n      = hypothesis.row(n) * VA_n.t();
+    const uvec    indi              = find( hypothesis_n != 999 );
     if ( indi.n_elem == 0 ) {
       continue;
     }
+
+    const mat prior_precision       = VA_n * prior_A_Vinv * VA_n.t();
+    const mat prior_variance        = inv_sympd(prior_precision);
+    const vec prior_mean            = prior_variance * trans(prior_A_mean.row(n) * prior_A_Vinv * VA_n.t());
+    const vec hypothesisn           = hypothesis_n.t();
+    const vec prior_mean_marg       = prior_mean.rows(indi);
+    const mat prior_variance_marg   = prior_variance.submat(indi, indi);
     
     for (int s=0; s<S; s++) {
       
@@ -610,12 +626,15 @@ Rcpp::List verify_autoregressive_homosk_cpp (
       double gamma_draw       = randg( distr_param(prior_hyper_a_A, hyper_sample(2 * N, s)) );
       hyper_sample(N + n, s)  = gamma_draw;
       hyper_sample(n, s)      = gamma_draw / chi2rnd( prior_hyper_nu_A );
+
+      mat prior_variance_draw = hyper_sample(n, s) * prior_variance_marg;
       
-      double const_prior      = - 0.5 * indi.n_elem * ( log2pi + log(hyper_sample(n, s)) );
-      rowvec hypothesis_n     = hypothesis.row(n) - prior_A.row(n);
-      double kernel_prior     = - 0.5 * pow(hyper_sample(n, s), -1) * accu( pow( hypothesis_n.cols(indi), 2)  );
-      
-      log_denominator_s(n, s) = const_prior + kernel_prior;
+      log_denominator_s(n, s) = dmvnorm_mean_var(
+        hypothesisn.rows(indi),
+        prior_mean_marg,
+        prior_variance_draw,
+        true
+      );
       
       // compute numerator
       mat   A0          = posterior_A.slice(s);
@@ -625,11 +644,12 @@ Rcpp::List verify_autoregressive_homosk_cpp (
       
       mat     precision_tmp   = (pow(posterior_hyper(n,1,s), -1) * prior_A_Vinv) + trans(Wn) * Wn;
       rowvec  location_tmp    = prior_A_mean.row(n) * (pow(posterior_hyper(n,1,s), -1) * prior_A_Vinv) + trans(zn) * Wn;
-      mat     variance_tmp    = inv_sympd(precision_tmp);
-      vec     mean_tmp        = variance_tmp * location_tmp.t();
-      mat     variance_marg   = variance_tmp.submat(indi, indi);
-      vec     mean_marg       = mean_tmp.rows(indi);
-      vec     hypothesisn     = trans(hypothesis.row(n));
+      mat     precision_free  = VA_n * precision_tmp * VA_n.t();
+      rowvec  location_free   = location_tmp * VA_n.t();
+      mat     variance_free   = inv_sympd(precision_free);
+      vec     mean_free       = variance_free * location_free.t();
+      mat     variance_marg   = variance_free.submat(indi, indi);
+      vec     mean_marg       = mean_free.rows(indi);
         
       log_numerator_s(n,s)    = dmvnorm_mean_var( hypothesisn.rows(indi), mean_marg, variance_marg, true );
     } // END s loop
