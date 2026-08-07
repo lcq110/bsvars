@@ -92,7 +92,7 @@ Rcpp::List verify_volatility_sv_cpp (
       // log denominator
       inv_sqrt_s_      = 0.0;
       if ( sample_s_ ) {
-        vec sample_prior_s_i    = prior_s_/sample_prior_s_.rows(indi);
+        vec sample_prior_s_i    = sample_prior_s_.rows(indi);
         inv_sqrt_s_             = as_scalar(mean(pow(sample_prior_s_i, -0.5)));
       } else {
         inv_sqrt_s_             = pow(prior_s_, -0.5);

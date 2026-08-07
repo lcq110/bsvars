@@ -179,3 +179,28 @@ expect_equal(
   tolerance = 1e-12,
   info = "heteroskedastic autoregression NSE uses the initialized components"
 )
+
+set.seed(305)
+out_sv <- .Call(
+  "_bsvars_verify_volatility_sv_cpp",
+  make_sv_posterior(long_draws), prior_sv, Y, X, TRUE,
+  PACKAGE = "bsvars"
+)
+prior_sv_scaled <- prior_sv
+prior_sv_scaled$sv_s_ <- 4
+set.seed(305)
+out_sv_scaled <- .Call(
+  "_bsvars_verify_volatility_sv_cpp",
+  make_sv_posterior(long_draws), prior_sv_scaled, Y, X, TRUE,
+  PACKAGE = "bsvars"
+)
+
+expect_equal(
+  as.numeric(
+    out_sv_scaled$components$se_components -
+      out_sv$components$se_components
+  ),
+  rep(log(2), 30L),
+  tolerance = 1e-12,
+  info = "SV NSE batches subset the original prior-scale draws"
+)
