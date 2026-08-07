@@ -86,3 +86,35 @@ expect_identical(
   as.integer(expected_indicators),
   info = "svar_ce1: mixture indicators use the centred log-volatility state."
 )
+
+
+# B13: prior scale feeds the s_ draw, which feeds sigma2_omega.
+low_prior_scale <- .centred_sv_draw(
+  10,
+  h,
+  u,
+  prior = list(sv_a_ = 1, sv_s_ = 0.1)
+)
+high_prior_scale <- .centred_sv_draw(
+  10,
+  h,
+  u,
+  prior = list(sv_a_ = 1, sv_s_ = 0.9)
+)
+
+expect_equal(
+  high_prior_scale$aux_s_n / low_prior_scale$aux_s_n,
+  (0.9 + 2) / (0.1 + 2),
+  tolerance = 1e-12,
+  info = "svar_ce1: sampled s_ uses prior sv_s_."
+)
+
+low_s <- .centred_sv_draw(10, h, u, s_ = 0.05, sample_s_ = FALSE)
+high_s <- .centred_sv_draw(10, h, u, s_ = 0.5, sample_s_ = FALSE)
+
+expect_equal(
+  high_s$aux_sigma2_omega_n / low_s$aux_sigma2_omega_n,
+  (1 / 0.05 + 1 / (2 * 0.1)) / (1 / 0.5 + 1 / (2 * 0.1)),
+  tolerance = 1e-12,
+  info = "svar_ce1: sigma2_omega conditional uses sampled s_."
+)

@@ -326,11 +326,11 @@ Rcpp::List svar_ce1 (
   
   // sample aux_s_n
   if ( sample_s_ ) {
-    aux_s_n               = (1 + 2 * aux_sigma2_omega_n) / chi2rnd(3 + 2 * prior_sv_a_);
+    aux_s_n               = (prior_sv_s_ + 2 * aux_sigma2_omega_n) / chi2rnd(3 + 2 * prior_sv_a_);
   }
   
   // sample aux_sigma2_omega
-  aux_sigma2_omega_n    = randg( distr_param(1 + 0.5 * prior_sv_a_, pow(pow(prior_sv_s_,-1) + pow(2 * aux_sigma2v_n,-1), -1)  ) );
+  aux_sigma2_omega_n    = randg( distr_param(1 + 0.5 * prior_sv_a_, pow(pow(aux_s_n,-1) + pow(2 * aux_sigma2v_n,-1), -1)  ) );
   
   // sample aux_rho
   rowvec    hm1         = aux_h_n.cols(0,T-2);
