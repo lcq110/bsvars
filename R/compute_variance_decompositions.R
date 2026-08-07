@@ -277,7 +277,7 @@ compute_variance_decompositions.PosteriorBSVARHMSH <- function(posterior, horizo
   
   S_T             = array(NA, c(M,N,S))
   for (s in 1:S) {
-    S_T[,,s]      = posterior$posterior$xi_cpp[S,1][[1]][,T,]
+    S_T[,,s]      = posterior$posterior$xi_cpp[s,1][[1]][,T,]
   }
 
   sigma2_T        = posterior$posterior$sigma[,T,]^2
