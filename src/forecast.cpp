@@ -74,6 +74,8 @@ arma::cube forecast_sigma2_msh (
       PR_ST       = trans(posterior_PR_TR.slice(s)) * PR_ST;
       St          = csample_num1(zeroM, wrap(PR_ST));
       forecasts_sigma2.slice(s).col(h) = posterior_sigma2.slice(s).col(St);
+      PR_ST.zeros();
+      PR_ST(St)   = 1.0;
       
     } // END h loop
   } // END s loop
@@ -111,6 +113,8 @@ arma::cube forecast_sigma2_hmsh (
         PR_ST       = trans(posterior_PR_TR(s).slice(n)) * PR_ST;
         St          = csample_num1(zeroM, wrap(PR_ST));
         forecasts_sigma2(n, h, s) = posterior_sigma2(n, St, s);
+        PR_ST.zeros();
+        PR_ST(St)   = 1.0;
       } // END h loop
       
     } // END n loop
@@ -278,4 +282,3 @@ Rcpp::List forecast_bsvars (
     _["forecast_cov"]   = out_forecast_cov
   );
 } // END forecast_bsvar
-
