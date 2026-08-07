@@ -120,7 +120,7 @@ compute_historical_decompositions.PosteriorBSVAR <- function(posterior, show_pro
   S               = dim(posterior_A)[3]
   
   ss              = .Call(`_bsvars_bsvars_structural_shocks`, posterior_B, posterior_A, Y, X)
-  ir              = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, T, p, TRUE)
+  ir              = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, T, p, FALSE)
   qqq             = .Call(`_bsvars_bsvars_hd`, ir, ss, show_progress)
   
   hd              = array(NA, c(N, N, T, S), dimnames = list(rownames(Y), rownames(Y), colnames(Y), 1:S))
@@ -197,7 +197,7 @@ compute_historical_decompositions.PosteriorBSVAREXH <- function(posterior, show_
   S               = dim(posterior_A)[3]
   
   ss              = .Call(`_bsvars_bsvars_structural_shocks`, posterior_B, posterior_A, Y, X)
-  ir              = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, T, p, TRUE)
+  ir              = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, T, p, FALSE)
   qqq             = .Call(`_bsvars_bsvars_hd`, ir, ss, show_progress)
   
   hd              = array(NA, c(N, N, T, S), dimnames = list(rownames(Y), rownames(Y), colnames(Y), 1:S))
@@ -274,7 +274,7 @@ compute_historical_decompositions.PosteriorBSVARMSH <- function(posterior, show_
   S               = dim(posterior_A)[3]
 
   ss              = .Call(`_bsvars_bsvars_structural_shocks`, posterior_B, posterior_A, Y, X)
-  ir              = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, T, p, TRUE)
+  ir              = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, T, p, FALSE)
   qqq             = .Call(`_bsvars_bsvars_hd`, ir, ss, show_progress)
 
   hd              = array(NA, c(N, N, T, S), dimnames = list(rownames(Y), rownames(Y), colnames(Y), 1:S))
@@ -350,7 +350,7 @@ compute_historical_decompositions.PosteriorBSVARHMSH <- function(posterior, show
   S               = dim(posterior_A)[3]
   
   ss              = .Call(`_bsvars_bsvars_structural_shocks`, posterior_B, posterior_A, Y, X)
-  ir              = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, T, p, TRUE)
+  ir              = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, T, p, FALSE)
   qqq             = .Call(`_bsvars_bsvars_hd`, ir, ss, show_progress)
   
   hd              = array(NA, c(N, N, T, S), dimnames = list(rownames(Y), rownames(Y), colnames(Y), 1:S))
@@ -426,7 +426,7 @@ compute_historical_decompositions.PosteriorBSVARMIX <- function(posterior, show_
   S               = dim(posterior_A)[3]
   
   ss              = .Call(`_bsvars_bsvars_structural_shocks`, posterior_B, posterior_A, Y, X)
-  ir              = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, T, p, TRUE)
+  ir              = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, T, p, FALSE)
   qqq             = .Call(`_bsvars_bsvars_hd`, ir, ss, show_progress)
   
   hd              = array(NA, c(N, N, T, S), dimnames = list(rownames(Y), rownames(Y), colnames(Y), 1:S))
@@ -502,7 +502,7 @@ compute_historical_decompositions.PosteriorBSVARSV <- function(posterior, show_p
   S               = dim(posterior_A)[3]
   
   ss              = .Call(`_bsvars_bsvars_structural_shocks`, posterior_B, posterior_A, Y, X)
-  ir              = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, T, p, TRUE)
+  ir              = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, T, p, FALSE)
   qqq             = .Call(`_bsvars_bsvars_hd`, ir, ss, show_progress)
   
   hd              = array(NA, c(N, N, T, S), dimnames = list(rownames(Y), rownames(Y), colnames(Y), 1:S))
@@ -580,7 +580,7 @@ compute_historical_decompositions.PosteriorBSVART <- function(posterior, show_pr
   S               = dim(posterior_A)[3]
   
   ss              = .Call(`_bsvars_bsvars_structural_shocks`, posterior_B, posterior_A, Y, X)
-  ir              = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, T, p, TRUE)
+  ir              = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, T, p, FALSE)
   qqq             = .Call(`_bsvars_bsvars_hd`, ir, ss, show_progress)
   
   hd              = array(NA, c(N, N, T, S), dimnames = list(rownames(Y), rownames(Y), colnames(Y), 1:S))
@@ -589,5 +589,4 @@ compute_historical_decompositions.PosteriorBSVART <- function(posterior, show_pr
   
   return(hd)
 }
-
 
