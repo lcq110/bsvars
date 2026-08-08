@@ -15,7 +15,7 @@ An object of class \code{SDDRvolatility} that is a list of three components:
 \code{logSDDR} an \code{N}-vector with values of the logarithm of the Bayes factors for 
 the homoskedasticity hypothesis for each of the shocks
 
-\code{log_SDDR_se} an \code{N}-vector with estimation standard errors of the logarithm of 
+\code{logSDDR_se} an \code{N}-vector with estimation standard errors of the logarithm of
 the Bayes factors reported in output element \code{logSDDR} that are computed based on 30 random 
 sub-samples of the log-ordinates of the marginal posterior and prior distributions.
 
