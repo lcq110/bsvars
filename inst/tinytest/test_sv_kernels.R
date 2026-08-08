@@ -1,0 +1,120 @@
+.sv_mixture_cdf <- function(x) {
+  .Call(bsvars:::`_bsvars_find_mixture_indicator_cdf`, x)
+}
+
+.sv_mixture_indicators <- function(cdf, T) {
+  .Call(
+    bsvars:::`_bsvars_inverse_transform_sampling`,
+    cdf,
+    as.integer(T)
+  )
+}
+
+.centred_sv_draw <- function(
+    seed,
+    h,
+    u,
+    prior = list(sv_a_ = 1, sv_s_ = 0.1),
+    s_ = 0.05,
+    sample_s_ = TRUE
+) {
+  set.seed(seed)
+  .Call(
+    bsvars:::`_bsvars_svar_ce1`,
+    h + 0,
+    0.5,
+    2,
+    0.1,
+    1,
+    s_,
+    rep.int(0L, length(h)),
+    u,
+    prior,
+    sample_s_
+  )
+}
+
+
+# B04: mixture CDF uses the normalized Gaussian component densities.
+alpha <- c(
+  1.92677, 1.34744, 0.73504, 0.02266, -0.85173,
+  -1.97278, -3.46788, -5.55246, -8.68384, -14.65000
+)
+variance <- c(
+  0.11265, 0.17788, 0.26768, 0.40611, 0.62699,
+  0.98583, 1.57469, 2.54498, 4.16591, 7.33342
+)
+probability <- c(
+  0.00609, 0.04775, 0.13057, 0.20674, 0.22715,
+  0.18842, 0.12047, 0.05591, 0.01575, 0.00115
+)
+data_normal <- c(-3, 0, 2)
+
+expected_cdf <- vapply(
+  data_normal,
+  function(x) {
+    log_weight <- log(probability) - 0.5 * log(variance) -
+      0.5 * (x - alpha)^2 / variance
+    weight <- exp(log_weight - max(log_weight))
+    cumsum(weight / sum(weight))
+  },
+  numeric(10)
+)
+
+expect_equal(
+  as.numeric(.sv_mixture_cdf(data_normal)),
+  as.numeric(expected_cdf),
+  tolerance = 1e-12,
+  info = "find_mixture_indicator_cdf: CDF matches normalized Gaussian mixture weights."
+)
+
+
+# B05: the centred measurement residual subtracts h, not omega * h.
+h <- c(0.1, -0.2, 0.3, -0.1, 0.2)
+u <- c(0.8, 1.2, 0.7, 1.5, 1.1)
+measurement <- log((u + 1e-9)^2)
+
+set.seed(1)
+expected_indicators <- .sv_mixture_indicators(
+  .sv_mixture_cdf(measurement - h),
+  length(h)
+)
+centred_draw <- .centred_sv_draw(1, h, u)
+
+expect_identical(
+  as.integer(centred_draw$aux_S_n),
+  as.integer(expected_indicators),
+  info = "svar_ce1: mixture indicators use the centred log-volatility state."
+)
+
+
+# B13: prior scale feeds the s_ draw, which feeds sigma2_omega.
+low_prior_scale <- .centred_sv_draw(
+  10,
+  h,
+  u,
+  prior = list(sv_a_ = 1, sv_s_ = 0.1)
+)
+high_prior_scale <- .centred_sv_draw(
+  10,
+  h,
+  u,
+  prior = list(sv_a_ = 1, sv_s_ = 0.9)
+)
+
+expect_equal(
+  high_prior_scale$aux_s_n / low_prior_scale$aux_s_n,
+  (0.9 + 2) / (0.1 + 2),
+  tolerance = 1e-12,
+  info = "svar_ce1: sampled s_ uses prior sv_s_."
+)
+
+low_s <- .centred_sv_draw(10, h, u, s_ = 0.05, sample_s_ = FALSE)
+high_s <- .centred_sv_draw(10, h, u, s_ = 0.5, sample_s_ = FALSE)
+
+expect_equal(
+  high_s$aux_sigma2_omega_n / low_s$aux_sigma2_omega_n,
+  (1 / 0.05 + 1 / (2 * 0.1)) / (1 / 0.5 + 1 / (2 * 0.1)),
+  tolerance = 1e-12,
+  info = "svar_ce1: sigma2_omega conditional uses sampled s_."
+)
