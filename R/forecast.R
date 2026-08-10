@@ -15,10 +15,9 @@ generics::forecast
 #' @param horizon a positive integer, specifying the forecasting horizon.
 #' @param exogenous_forecast a matrix of dimension \code{horizon x d} containing 
 #' forecasted values of the exogenous variables. 
-#' @param conditional_forecast a \code{horizon x N} matrix with forecasted values 
-#' for selected variables. It should only contain \code{numeric} or \code{NA} 
-#' values. The entries with \code{NA} values correspond to the values that are 
-#' forecasted conditionally on the realisations provided as \code{numeric} values.
+#' @param conditional_forecast a \code{horizon x N} matrix with forecasted values
+#' for selected variables. Finite entries provide the conditioning realisations.
+#' Non-finite entries identify variables to be forecast conditionally on them.
 #' @param ... not used
 #' 
 #' @return A list of class \code{Forecasts} containing the
@@ -30,7 +29,15 @@ generics::forecast
 #'  \item{forecasts}{an \code{NxTxS} array with the draws from predictive density}
 #'  \item{Y}{an \eqn{NxT} matrix with the data on dependent variables}
 #'  \item{forecast_mean}{an \code{NxTxS} array with the mean of the predictive density}
-#'  \item{forecast_covariance}{an \code{NxTxS} array with the covariance of the predictive density}
+#'  \item{forecast_covariance}{an \code{NxNxTxS} array with the covariance of the predictive density}
+#'  \item{forecast_factor}{for unconditional forecasts, a list with representation
+#'  \code{"B_sigma2_v1"}, an \code{NxNxS} array \code{B} aligned with the predictive
+#'  draws, and an \code{NxTxS} array \code{sigma2} of structural variances. For draw
+#'  \code{s} and horizon \code{h}, \code{B[,,s] \%*\% (y - forecast_mean[,h,s])}
+#'  has covariance \code{diag(sigma2[,h,s])}. Equivalently, draws use
+#'  \code{forecast_mean[,h,s] + solve(B[,,s], diag(sqrt(sigma2[,h,s]))) \%*\% z}
+#'  for a standard normal vector \code{z}. This element is absent for conditional
+#'  forecasts.}
 #' }
 #' 
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
@@ -162,6 +169,13 @@ forecast.PosteriorBSVAR = function(
   
   # output$forecasts_sigma = forecast_sigma2
   output$Y          = Y
+  if (all(!is.finite(conditional_forecast))) {
+    output$forecast_factor = list(
+      representation = "B_sigma2_v1",
+      B              = posterior_B,
+      sigma2         = forecast_sigma2
+    )
+  }
   class(output)     = "Forecasts"
   
   return(output)
@@ -319,6 +333,13 @@ forecast.PosteriorBSVAREXH = function(
   output$forecast_covariance  = forecast_covariance
   
   output$Y          = Y
+  if (all(!is.finite(conditional_forecast))) {
+    output$forecast_factor = list(
+      representation = "B_sigma2_v1",
+      B              = posterior_B,
+      sigma2         = forecast_sigma2
+    )
+  }
   class(output)     = "Forecasts"
   
   return(output)
@@ -481,6 +502,13 @@ forecast.PosteriorBSVARHMSH = function(
   output$forecast_covariance  = forecast_covariance
   
   output$Y          = Y
+  if (all(!is.finite(conditional_forecast))) {
+    output$forecast_factor = list(
+      representation = "B_sigma2_v1",
+      B              = posterior_B,
+      sigma2         = forecast_sigma2
+    )
+  }
   class(output)     = "Forecasts"
   
   return(output)
@@ -643,6 +671,13 @@ forecast.PosteriorBSVARMSH = function(
   output$forecast_covariance  = forecast_covariance
   
   output$Y          = Y
+  if (all(!is.finite(conditional_forecast))) {
+    output$forecast_factor = list(
+      representation = "B_sigma2_v1",
+      B              = posterior_B,
+      sigma2         = forecast_sigma2
+    )
+  }
   class(output)     = "Forecasts"
   
   return(output)
@@ -798,6 +833,13 @@ forecast.PosteriorBSVARMIX = function(
   output$forecast_covariance  = forecast_covariance
   
   output$Y          = Y
+  if (all(!is.finite(conditional_forecast))) {
+    output$forecast_factor = list(
+      representation = "B_sigma2_v1",
+      B              = posterior_B,
+      sigma2         = forecast_sigma2
+    )
+  }
   class(output)     = "Forecasts"
   
   return(output)
@@ -956,6 +998,13 @@ forecast.PosteriorBSVARSV = function(
   output$forecast_covariance  = forecast_covariance
   
   output$Y          = Y
+  if (all(!is.finite(conditional_forecast))) {
+    output$forecast_factor = list(
+      representation = "B_sigma2_v1",
+      B              = posterior_B,
+      sigma2         = forecast_sigma2
+    )
+  }
   class(output)     = "Forecasts"
   
   return(output)
@@ -1098,6 +1147,13 @@ forecast.PosteriorBSVART = function(
   output$forecast_covariance  = forecast_covariance
   
   output$Y          = Y
+  if (all(!is.finite(conditional_forecast))) {
+    output$forecast_factor = list(
+      representation = "B_sigma2_v1",
+      B              = posterior_B,
+      sigma2         = forecast_sigma2
+    )
+  }
   class(output)     = "Forecasts"
   
   return(output)

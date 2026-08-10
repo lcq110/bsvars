@@ -236,26 +236,36 @@ Rcpp::List forecast_bsvars (
     
     for (int h=0; h<horizon; h++) {
       
-      mat   B_inv             = inv(posterior_B.slice(s));
-      mat   s2_diag           = diagmat(forecast_sigma2.slice(s).col(h));
-      mat   Sigma             = B_inv * s2_diag * B_inv.t();
-      Sigma                   = 0.5 * (Sigma + Sigma.t());
       vec   cond_forecast_h   = trans(cond_forecast.row(h));
       uvec  nonf_el           = find_nonfinite( cond_forecast_h );
       int   nonf_no           = nonf_el.n_elem;
       vec   forecast_mean     = posterior_A.slice(s) * Xt;
-      mat   forecast_cov      = Sigma;
+      mat   forecast_cov;
       
       if ( nonf_no == N ) {
-        draw          = mvnrnd(forecast_mean, Sigma);
+        vec   sigma2            = forecast_sigma2.slice(s).col(h);
+        if ( !sigma2.is_finite() || sigma2.min() <= 0 ) {
+          stop("Forecast structural variances must be finite and positive.");
+        }
+        mat   impact            = solve(
+          posterior_B.slice(s),
+          diagmat(sqrt(sigma2)),
+          solve_opts::no_approx
+        );
+        draw                    = forecast_mean + impact * randn<vec>(N);
+        forecast_cov            = impact * impact.t();
       } else {
+        mat   B_inv             = inv(posterior_B.slice(s));
+        mat   s2_diag           = diagmat(forecast_sigma2.slice(s).col(h));
+        mat   Sigma             = B_inv * s2_diag * B_inv.t();
+        Sigma                   = 0.5 * (Sigma + Sigma.t());
         uvec  finite_el          = find_finite(cond_forecast_h);
         vec   fixed_values       = cond_forecast_h(finite_el);
         vec   unconditional_mean = forecast_mean;
 
         draw                    = cond_forecast_h;
         forecast_mean           = cond_forecast_h;
-        forecast_cov.zeros();
+        forecast_cov            = zeros<mat>(N, N);
 
         if ( nonf_no > 0 ) {
           vec   mean_free         = unconditional_mean(nonf_el);

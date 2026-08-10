@@ -1,6 +1,59 @@
 
 data(us_fiscal_lsuw)
 
+check_forecast_factor = function(forecasts, posterior, horizon, model) {
+  posterior_B = posterior$posterior$B
+  factor = forecasts$forecast_factor
+  expected_dimensions = c(
+    dim(posterior_B)[1],
+    as.integer(horizon),
+    dim(posterior_B)[3]
+  )
+
+  expect_identical(
+    names(forecasts)[1:5],
+    c("forecasts", "forecast_mean", "forecast_cov", "forecast_covariance", "Y"),
+    info = paste(model, "keeps the existing first five forecast fields.")
+  )
+  expect_identical(
+    names(factor),
+    c("representation", "B", "sigma2"),
+    info = paste(model, "returns the documented factor schema.")
+  )
+  expect_identical(
+    factor$representation,
+    "B_sigma2_v1",
+    info = paste(model, "identifies the factor representation version.")
+  )
+  expect_identical(
+    factor$B,
+    posterior_B,
+    info = paste(model, "keeps B aligned with each posterior predictive draw.")
+  )
+  expect_identical(
+    dim(factor$sigma2),
+    expected_dimensions,
+    info = paste(model, "returns structural variances with N by H by S dimensions.")
+  )
+
+  structural_covariance_error = 0
+  for (s in seq_len(dim(posterior_B)[3])) {
+    for (h in seq_len(horizon)) {
+      covariance = forecasts$forecast_covariance[, , h, s]
+      structural_covariance =
+        factor$B[, , s] %*% covariance %*% t(factor$B[, , s])
+      structural_covariance_error = max(
+        structural_covariance_error,
+        abs(structural_covariance - diag(factor$sigma2[, h, s]))
+      )
+    }
+  }
+  expect_true(
+    structural_covariance_error < 1e-8,
+    info = paste(model, "aligns B and sigma2 with every forecast covariance.")
+  )
+}
+
 # for bsvar
 set.seed(1)
 suppressMessages(
@@ -8,6 +61,7 @@ suppressMessages(
 )
 run_no1             <- estimate(specification_no1, 3, 1, show_progress = FALSE)
 ff                  <- forecast(run_no1, horizon = 2)
+check_forecast_factor(ff, run_no1, 2, "PosteriorBSVAR")
 
 set.seed(1)
 suppressMessages(
@@ -49,6 +103,7 @@ suppressMessages(
 )
 run_no1             <- estimate(specification_no1, 3, 1, show_progress = FALSE)
 ff                  <- forecast(run_no1, horizon = 2)
+check_forecast_factor(ff, run_no1, 2, "PosteriorBSVARMSH")
 
 set.seed(1)
 suppressMessages(
@@ -98,6 +153,7 @@ suppressMessages(
 )
 run_no1             <- estimate(specification_no1, 3, 1, show_progress = FALSE)
 ff                  <- forecast(run_no1, horizon = 2)
+check_forecast_factor(ff, run_no1, 2, "PosteriorBSVARMIX")
 
 set.seed(1)
 suppressMessages(
@@ -147,6 +203,7 @@ suppressMessages(
 )
 run_no1             <- estimate(specification_no1, 3, 1, show_progress = FALSE)
 ff                  <- forecast(run_no1, horizon = 2)
+check_forecast_factor(ff, run_no1, 2, "PosteriorBSVARSV")
 
 set.seed(1)
 suppressMessages(
@@ -196,6 +253,7 @@ suppressMessages(
 )
 run_no1             <- estimate(specification_no1, 3, 1, show_progress = FALSE)
 ff                  <- forecast(run_no1, horizon = 2)
+check_forecast_factor(ff, run_no1, 2, "PosteriorBSVARSV (centred)")
 
 set.seed(1)
 suppressMessages(
@@ -228,6 +286,7 @@ suppressMessages(
 )
 run_no1             <- estimate(specification_no1, 3, 1, show_progress = FALSE)
 ff                  <- forecast(run_no1, horizon = 2)
+check_forecast_factor(ff, run_no1, 2, "PosteriorBSVART")
 
 set.seed(1)
 suppressMessages(
@@ -263,6 +322,10 @@ suppressMessages(
 )
 run_no1             <- estimate(specification_no1, 3, 1, show_progress = FALSE)
 ff                  <- forecast(run_no1, horizon = 2, conditional_forecast = cf)
+expect_false(
+  "forecast_factor" %in% names(ff),
+  info = "Conditional forecasts do not expose an unconditional factor."
+)
 
 set.seed(1)
 suppressMessages(
@@ -288,6 +351,47 @@ expect_error(
   info = "conditonal forecast: wrong value of horizon."
 )
 
+set.seed(20260810)
+unconditional_na = forecast(
+  run_no1,
+  horizon = 2,
+  conditional_forecast = matrix(NA_real_, 2, 3)
+)
+unconditional_na_seed = .Random.seed
+set.seed(20260810)
+unconditional_inf = forecast(
+  run_no1,
+  horizon = 2,
+  conditional_forecast = matrix(Inf, 2, 3)
+)
+expect_identical(
+  unconditional_inf,
+  unconditional_na,
+  info = "All non-finite conditioning values use the unconditional forecast path."
+)
+expect_identical(
+  .Random.seed,
+  unconditional_na_seed,
+  info = "All non-finite conditioning values consume the same predictive RNG."
+)
+
+set.seed(20260810)
+fully_conditional_seed = .Random.seed
+fully_conditional = forecast(
+  run_no1,
+  horizon = 2,
+  conditional_forecast = matrix(0, 2, 3)
+)
+expect_false(
+  "forecast_factor" %in% names(fully_conditional),
+  info = "Fully conditional forecasts do not expose an unconditional factor."
+)
+expect_identical(
+  .Random.seed,
+  fully_conditional_seed,
+  info = "Fully conditional normal forecasts do not consume predictive-draw RNG."
+)
+
 
 # for bsvar_msh
 set.seed(1)
@@ -296,6 +400,10 @@ suppressMessages(
 )
 run_no1             <- estimate(specification_no1, 3, 1, show_progress = FALSE)
 ff                  <- forecast(run_no1, horizon = 2, conditional_forecast = cf)
+expect_false(
+  "forecast_factor" %in% names(ff),
+  info = "Conditional forecasts do not expose an unconditional factor."
+)
 
 set.seed(1)
 suppressMessages(
@@ -326,6 +434,10 @@ suppressMessages(
 )
 run_no1             <- estimate(specification_no1, 3, 1, show_progress = FALSE)
 ff                  <- forecast(run_no1, horizon = 2, conditional_forecast = cf)
+expect_false(
+  "forecast_factor" %in% names(ff),
+  info = "Conditional forecasts do not expose an unconditional factor."
+)
 
 set.seed(1)
 suppressMessages(
@@ -363,6 +475,10 @@ suppressMessages(
 )
 run_no1             <- estimate(specification_no1, 3, 1, show_progress = FALSE)
 ff                  <- forecast(run_no1, horizon = 2, conditional_forecast = cf)
+expect_false(
+  "forecast_factor" %in% names(ff),
+  info = "Conditional forecasts do not expose an unconditional factor."
+)
 
 set.seed(1)
 suppressMessages(
@@ -393,6 +509,10 @@ suppressMessages(
 )
 run_no1             <- estimate(specification_no1, 3, 1, show_progress = FALSE)
 ff                  <- forecast(run_no1, horizon = 2, conditional_forecast = cf)
+expect_false(
+  "forecast_factor" %in% names(ff),
+  info = "Conditional forecasts do not expose an unconditional factor."
+)
 
 set.seed(1)
 suppressMessages(
@@ -422,6 +542,12 @@ suppressMessages(
 )
 run_no1             <- estimate(specification_no1, 3, 1, show_progress = FALSE)
 ff                  <- forecast(run_no1, horizon = 2)
+check_forecast_factor(ff, run_no1, 2, "PosteriorBSVARHMSH")
+ff_conditional      <- forecast(run_no1, horizon = 2, conditional_forecast = cf)
+expect_false(
+  "forecast_factor" %in% names(ff_conditional),
+  info = "PosteriorBSVARHMSH conditional forecasts do not expose a factor."
+)
 
 set.seed(1)
 suppressMessages(
@@ -455,6 +581,12 @@ suppressMessages(
 )
 run_no1             <- estimate(specification_no1, 3, 1, show_progress = FALSE)
 ff                  <- forecast(run_no1, horizon = 2)
+check_forecast_factor(ff, run_no1, 2, "PosteriorBSVAREXH")
+ff_conditional      <- forecast(run_no1, horizon = 2, conditional_forecast = cf)
+expect_false(
+  "forecast_factor" %in% names(ff_conditional),
+  info = "PosteriorBSVAREXH conditional forecasts do not expose a factor."
+)
 
 set.seed(1)
 suppressMessages(
@@ -474,4 +606,3 @@ expect_identical(
   ff$forecast_mean[1,1,1], ff2$forecast_mean[1,1,1],
   info = "conditonal forecast: hmsh: forecast_mean identical for normal and pipe workflow."
 )
-
