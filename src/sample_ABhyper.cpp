@@ -10,6 +10,53 @@ using namespace Rcpp;
 using namespace arma;
 
 
+namespace {
+
+arma::mat chol_inverse_precision (
+    const arma::mat&  precision,
+    const arma::mat&  prior_precision,
+    const arma::mat&  weighted_observations,
+    const arma::mat&  restrictions,
+    const double      prior_scale,
+    const int         posterior_nu
+) {
+  const int dimension = restrictions.n_rows;
+  mat covariance;
+  mat covariance_chol;
+  if (inv_sympd(covariance, precision) &&
+      chol(covariance_chol, posterior_nu * covariance)) {
+    return covariance_chol;
+  }
+
+  mat prior_chol = trimatu(chol(prior_precision));
+  mat design = join_cols(
+    prior_scale * prior_chol * trans(restrictions),
+    trans(weighted_observations) * trans(restrictions)
+  );
+  mat Q;
+  mat precision_chol;
+  qr_econ(Q, precision_chol, design);
+  precision_chol = trimatu(precision_chol);
+
+  mat inverse_factor = solve(
+    trimatl(trans(precision_chol)),
+    eye<mat>(dimension, dimension),
+    solve_opts::no_approx
+  );
+  qr_econ(Q, covariance_chol, inverse_factor);
+  covariance_chol = trimatu(covariance_chol);
+  for (int i=0; i<dimension; i++) {
+    if (covariance_chol(i,i) < 0) {
+      covariance_chol.row(i) *= -1;
+    }
+  }
+
+  return sqrt(posterior_nu) * covariance_chol;
+}
+
+} // anonymous namespace
+
+
 
 /*______________________function sample_A_homosk1______________________*/
 // [[Rcpp::interfaces(cpp)]]
@@ -151,7 +198,14 @@ arma::mat sample_B_homosk1 (
     posterior_S_inv         = 0.5*( posterior_S_inv + posterior_S_inv.t() );
     
     // sample B
-    mat Un                  = chol(posterior_nu * inv_sympd(posterior_S_inv));
+    mat Un                  = chol_inverse_precision(
+      posterior_S_inv,
+      prior_SS_inv,
+      shocks,
+      VB(n),
+      pow(aux_hyper(n,0), -0.5),
+      posterior_nu
+    );
     mat B_tmp               = aux_B;
     B_tmp.shed_row(n);
     rowvec w                = trans(orthogonal_complement_matrix_TW(B_tmp.t()));
@@ -218,7 +272,14 @@ arma::mat sample_B_heterosk1 (
     posterior_S_inv         = 0.5*( posterior_S_inv + posterior_S_inv.t() );
     
     // sample B
-    mat Un                  = chol(posterior_nu * inv_sympd(posterior_S_inv));
+    mat Un                  = chol_inverse_precision(
+      posterior_S_inv,
+      prior_SS_inv,
+      shocks_sigma,
+      VB(n),
+      pow(aux_hyper(n,0), -0.5),
+      posterior_nu
+    );
     mat B_tmp               = aux_B;
     B_tmp.shed_row(n);
     rowvec w                = trans(orthogonal_complement_matrix_TW(B_tmp.t()));
