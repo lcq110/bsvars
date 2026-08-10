@@ -12,23 +12,51 @@ using namespace arma;
 
 namespace {
 
+arma::vec draw_regression_coefficients (
+    const arma::mat&  prior_chol,
+    const arma::vec&  prior_mean,
+    const arma::mat&  weighted_observations,
+    const arma::vec&  weighted_response,
+    const arma::mat&  restrictions,
+    const double      prior_scale
+) {
+  mat design = join_cols(
+    prior_scale * prior_chol * trans(restrictions),
+    weighted_observations * trans(restrictions)
+  );
+  vec response = join_cols(
+    prior_scale * prior_chol * prior_mean,
+    weighted_response
+  );
+  mat Q;
+  mat precision_chol;
+  qr_econ(Q, precision_chol, design);
+  precision_chol = trimatu(precision_chol);
+  for (uword i=0; i<precision_chol.n_rows; i++) {
+    if (precision_chol(i,i) < 0) {
+      precision_chol.row(i) *= -1;
+      Q.col(i) *= -1;
+    }
+  }
+
+  vec noise(restrictions.n_rows, fill::randn);
+  return solve(
+    trimatu(precision_chol),
+    trans(Q) * response + noise,
+    solve_opts::no_approx
+  );
+}
+
+
 arma::mat chol_inverse_precision (
-    const arma::mat&  precision,
-    const arma::mat&  prior_precision,
+    const arma::mat&  prior_chol,
     const arma::mat&  weighted_observations,
     const arma::mat&  restrictions,
     const double      prior_scale,
     const int         posterior_nu
 ) {
   const int dimension = restrictions.n_rows;
-  mat covariance;
   mat covariance_chol;
-  if (inv_sympd(covariance, precision) &&
-      chol(covariance_chol, posterior_nu * covariance)) {
-    return covariance_chol;
-  }
-
-  mat prior_chol = trimatu(chol(prior_precision));
   mat design = join_cols(
     prior_scale * prior_chol * trans(restrictions),
     trans(weighted_observations) * trans(restrictions)
@@ -76,23 +104,23 @@ arma::mat sample_A_homosk1 (
   
   mat prior_A_mean    = as<mat>(prior["A"]);
   mat prior_A_Vinv    = as<mat>(prior["A_V_inv"]);
+  mat prior_A_chol    = trimatu(chol(prior_A_Vinv));
   rowvec    zerosA(K);
   
   for (int n=0; n<N; n++) {
-    
-    int rna           = VA(n).n_rows;
     mat   A0          = aux_A;
     A0.row(n)         = zerosA;
     vec   zn          = vectorise( aux_B * (Y - A0 * X) );
     mat   Wn          = kron( trans(X), aux_B.col(n) );
     
-    mat     precision = VA(n) * ( (pow(aux_hyper(n,1), -1) * prior_A_Vinv) + trans(Wn) * Wn ) * trans(VA(n));
-    rowvec  location  = ( prior_A_mean.row(n) * (pow(aux_hyper(n,1), -1) * prior_A_Vinv) + trans(zn) * Wn ) * trans(VA(n));
-    
-    mat     precision_chol = trimatu(chol(precision));
-    vec     xx(rna, fill::randn);
-    vec     draw      = solve(precision_chol, 
-                              solve(trans(precision_chol), trans(location)) + xx);
+    vec draw = draw_regression_coefficients(
+      prior_A_chol,
+      trans(prior_A_mean.row(n)),
+      Wn,
+      zn,
+      VA(n),
+      pow(aux_hyper(n,1), -0.5)
+    );
     aux_A.row(n)      = trans(draw) * VA(n);
   } // END n loop
   
@@ -120,12 +148,11 @@ arma::mat sample_A_heterosk1 (
   
   mat prior_A_mean    = as<mat>(prior["A"]);
   mat prior_A_Vinv    = as<mat>(prior["A_V_inv"]);
+  mat prior_A_chol    = trimatu(chol(prior_A_Vinv));
   rowvec    zerosA(K);
   vec sigma_vectorised= vectorise(aux_sigma);
   
   for (int n=0; n<N; n++) {
-    
-    int rna           = VA(n).n_rows;
     mat   A0          = aux_A;
     A0.row(n)         = zerosA;
     vec   zn          = vectorise( aux_B * (Y - A0 * X) );
@@ -133,37 +160,14 @@ arma::mat sample_A_heterosk1 (
     mat   Wn          = kron( trans(X), aux_B.col(n) );
     mat   Wn_sigma    = Wn.each_col() / sigma_vectorised;
     
-    mat     precision = VA(n) * ( (pow(aux_hyper(n,1), -1) * prior_A_Vinv) + trans(Wn_sigma) * Wn_sigma ) * trans(VA(n));
-    precision         = 0.5 * (precision + precision.t());
-    rowvec  location  = ( prior_A_mean.row(n) * (pow(aux_hyper(n,1), -1) * prior_A_Vinv) + trans(zn_sigma) * Wn_sigma ) * trans(VA(n));
-    
-    mat     precision_chol;
-    if (!chol(precision_chol, precision)) {
-      // Factor the same precision from the augmented design without forming normal equations.
-      mat prior_A_Vinv_chol = trimatu(chol(prior_A_Vinv));
-      double prior_scale    = pow(aux_hyper(n,1), -0.5);
-      mat augmented_design  = join_cols(
-        prior_scale * prior_A_Vinv_chol * trans(VA(n)),
-        Wn_sigma * trans(VA(n))
-      );
-      vec augmented_response = join_cols(
-        prior_scale * prior_A_Vinv_chol * trans(prior_A_mean.row(n)),
-        zn_sigma
-      );
-      mat Q;
-      qr_econ(Q, precision_chol, augmented_design);
-      precision_chol = trimatu(precision_chol);
-
-      vec xx(rna, fill::randn);
-      vec draw = solve(precision_chol, trans(Q) * augmented_response + xx);
-      aux_A.row(n) = trans(draw) * VA(n);
-      continue;
-    }
-
-    precision_chol = trimatu(precision_chol);
-    vec     xx(rna, fill::randn);
-    vec     draw      = solve(precision_chol,
-                              solve(trans(precision_chol), trans(location)) + xx);
+    vec draw = draw_regression_coefficients(
+      prior_A_chol,
+      trans(prior_A_mean.row(n)),
+      Wn_sigma,
+      zn_sigma,
+      VA(n),
+      pow(aux_hyper(n,1), -0.5)
+    );
     aux_A.row(n)      = trans(draw) * VA(n);
   } // END n loop
   
@@ -190,17 +194,13 @@ arma::mat sample_B_homosk1 (
   
   const int posterior_nu    = T + as<int>(prior["B_nu"]);
   mat prior_SS_inv          = as<mat>(prior["B_V_inv"]);
+  mat prior_SS_chol         = trimatu(chol(prior_SS_inv));
   mat shocks                = Y - aux_A * X;
-  mat posterior_SS_inv      = shocks * shocks.t();
   
   for (int n=0; n<N; n++) {
-    mat posterior_S_inv     = VB(n) * ((pow(aux_hyper(n,0), -1) * prior_SS_inv) + posterior_SS_inv) * VB(n).t();
-    posterior_S_inv         = 0.5*( posterior_S_inv + posterior_S_inv.t() );
-    
     // sample B
     mat Un                  = chol_inverse_precision(
-      posterior_S_inv,
-      prior_SS_inv,
+      prior_SS_chol,
       shocks,
       VB(n),
       pow(aux_hyper(n,0), -0.5),
@@ -260,6 +260,7 @@ arma::mat sample_B_heterosk1 (
   
   const int posterior_nu    = T + as<int>(prior["B_nu"]);
   mat prior_SS_inv          = as<mat>(prior["B_V_inv"]);
+  mat prior_SS_chol         = trimatu(chol(prior_SS_inv));
   mat shocks                = Y - aux_A * X;
   
   
@@ -267,14 +268,10 @@ arma::mat sample_B_heterosk1 (
     
     // set scale matrix
     mat shocks_sigma        = shocks.each_row() / aux_sigma.row(n);
-    mat posterior_SS_inv    = (pow(aux_hyper(n,0), -1) * prior_SS_inv) + shocks_sigma * shocks_sigma.t();
-    mat posterior_S_inv     = VB(n) * posterior_SS_inv * VB(n).t();
-    posterior_S_inv         = 0.5*( posterior_S_inv + posterior_S_inv.t() );
     
     // sample B
     mat Un                  = chol_inverse_precision(
-      posterior_S_inv,
-      prior_SS_inv,
+      prior_SS_chol,
       shocks_sigma,
       VB(n),
       pow(aux_hyper(n,0), -0.5),
