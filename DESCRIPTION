@@ -48,6 +48,7 @@ Suggests:
     knitr,
     tinytest
 LinkingTo: 
+    BH (>= 1.84.0-0),
     Rcpp, 
     RcppProgress, 
     RcppArmadillo, 

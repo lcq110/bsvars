@@ -43,18 +43,21 @@ draw = .Call(
 expect_equal(dim(draw), c(N, K))
 expect_true(
   all(is.finite(draw)),
-  info = "QR draws from a valid ill-conditioned conditional posterior."
+  info = "The sampler draws from a valid ill-conditioned conditional posterior."
 )
 
 shifted_Y = matrix(c(1, -2), N, T)
 shifted_prior = prior
 shifted_prior$A = matrix(c(0.5, -0.25), N, K)
+location_sigma = matrix(c(1e-4, 1), N, T)
+location_weighted_design = t(X) / drop(location_sigma)
+location_augmented_design = rbind(diag(K), location_weighted_design)
 augmented_response = c(
   drop(shifted_prior$A),
-  drop(shifted_Y) / drop(aux_sigma)
+  drop(shifted_Y) / drop(location_sigma)
 )
 expected_mean_shift = qr.coef(
-  qr(augmented_design, LAPACK = TRUE),
+  qr(location_augmented_design, LAPACK = TRUE),
   augmented_response
 )
 
@@ -64,7 +67,7 @@ zero_draw = .Call(
   aux_A,
   aux_B,
   aux_hyper,
-  aux_sigma,
+  location_sigma,
   Y,
   X,
   prior,
@@ -77,7 +80,7 @@ shifted_draw = .Call(
   aux_A,
   aux_B,
   aux_hyper,
-  aux_sigma,
+  location_sigma,
   shifted_Y,
   X,
   shifted_prior,
@@ -89,7 +92,7 @@ expect_equal(
   drop(shifted_draw - zero_draw),
   drop(expected_mean_shift),
   tolerance = 1e-8,
-  info = "QR uses the correct conditional-posterior location."
+  info = "The sampler uses the correct conditional-posterior location."
 )
 
 silent_scale = 1e8
@@ -137,7 +140,10 @@ expect_equal(
   drop(shifted_silent_draw - zero_silent_draw),
   target_mean,
   tolerance = 1e-7,
-  info = "QR remains accurate when the normal-equation Cholesky silently succeeds."
+  info = paste(
+    "The sampler remains accurate when the normal-equation Cholesky",
+    "silently succeeds."
+  )
 )
 
 set.seed(5)

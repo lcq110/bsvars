@@ -1,10 +1,13 @@
 
 
 #include <RcppArmadillo.h>
+#include <cmath>
+#include <limits>
 #include "progress.hpp"
 #include "Rcpp/Rmath.h"
 
 #include "utils.h"
+#include "multiprecision.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -28,22 +31,9 @@ arma::vec draw_regression_coefficients (
     prior_scale * prior_chol * prior_mean,
     weighted_response
   );
-  mat Q;
-  mat precision_chol;
-  qr_econ(Q, precision_chol, design);
-  precision_chol = trimatu(precision_chol);
-  for (uword i=0; i<precision_chol.n_rows; i++) {
-    if (precision_chol(i,i) < 0) {
-      precision_chol.row(i) *= -1;
-      Q.col(i) *= -1;
-    }
-  }
-
-  vec noise(restrictions.n_rows, fill::randn);
-  return solve(
-    trimatu(precision_chol),
-    trans(Q) * response + noise,
-    solve_opts::no_approx
+  return bsvars::draw_regression_coefficients_multiprecision(
+    design,
+    response
   );
 }
 
@@ -65,6 +55,16 @@ arma::mat chol_inverse_precision (
   mat precision_chol;
   qr_econ(Q, precision_chol, design);
   precision_chol = trimatu(precision_chol);
+
+  const double reciprocal_condition = rcond(precision_chol);
+  const double threshold =
+    dimension * std::sqrt(std::numeric_limits<double>::epsilon());
+  if (!(reciprocal_condition > threshold)) {
+    return bsvars::chol_inverse_precision_multiprecision(
+      design,
+      posterior_nu
+    );
+  }
 
   mat inverse_factor = solve(
     trimatl(trans(precision_chol)),

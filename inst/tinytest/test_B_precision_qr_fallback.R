@@ -190,3 +190,147 @@ expect_true(
     "of the inverse precision."
   )
 )
+
+fallback_N = 2L
+fallback_T = 1L
+fallback_scale = 1e10
+fallback_prior_precision = 5
+fallback_posterior_nu = 4L
+fallback_prior = list(
+  B_nu = fallback_posterior_nu - fallback_T,
+  B_V_inv = fallback_prior_precision * diag(fallback_N)
+)
+fallback_VB = list(
+  diag(fallback_N),
+  matrix(c(0, 1), 1L, fallback_N)
+)
+fallback_aux_A = matrix(0, fallback_N, 1L)
+fallback_aux_hyper = matrix(1, 2 * fallback_N + 1L, 2L)
+fallback_sigma = matrix(1, fallback_N, fallback_T)
+fallback_X = matrix(0, 1L, fallback_T)
+fallback_Y = matrix(fallback_scale, fallback_N, fallback_T)
+sample_fallback_B = function(
+    Y,
+    draw_prior = fallback_prior,
+    draw_VB = fallback_VB
+) {
+  .Call(
+    "_bsvars_sample_B_heterosk1",
+    diag(fallback_N),
+    fallback_aux_A,
+    fallback_aux_hyper,
+    fallback_sigma,
+    Y,
+    fallback_X,
+    draw_prior,
+    draw_VB,
+    PACKAGE = "bsvars"
+  )
+}
+fallback_design = rbind(
+  sqrt(fallback_prior_precision) * diag(fallback_N),
+  rep(fallback_scale, fallback_N)
+)
+fallback_R = qr.R(qr(fallback_design, LAPACK = TRUE))
+fallback_threshold = fallback_N * sqrt(.Machine$double.eps)
+expect_true(
+  rcond(fallback_R) < fallback_threshold / 20,
+  info = "The two-dimensional fixture is well inside the fixed256 branch."
+)
+
+# Here P = v I + s^2 11'.  These closed-form expressions construct the
+# canonical upper U with U' U = nu P^-1 without forming P or its inverse.
+fallback_denominator = fallback_prior_precision * (
+  fallback_prior_precision + 2 * fallback_scale^2
+)
+fallback_covariance_11 = fallback_posterior_nu * (
+  fallback_prior_precision + fallback_scale^2
+) / fallback_denominator
+fallback_covariance_12 = -fallback_posterior_nu * fallback_scale^2 /
+  fallback_denominator
+fallback_covariance_determinant = fallback_posterior_nu^2 /
+  fallback_denominator
+fallback_U11 = sqrt(fallback_covariance_11)
+fallback_U12 = fallback_covariance_12 / fallback_U11
+fallback_U22 = sqrt(fallback_covariance_determinant) / fallback_U11
+fallback_reference_upper = rbind(
+  c(fallback_U11, fallback_U12),
+  c(0, fallback_U22)
+)
+fallback_alpha_second_moment = diag(c(
+  (fallback_posterior_nu + 1) / fallback_posterior_nu,
+  1 / fallback_posterior_nu
+))
+fallback_expected_second_moment = t(fallback_reference_upper) %*%
+  fallback_alpha_second_moment %*% fallback_reference_upper
+fallback_transposed_second_moment = fallback_reference_upper %*%
+  fallback_alpha_second_moment %*% t(fallback_reference_upper)
+expect_true(
+  max(abs(
+    fallback_expected_second_moment - fallback_transposed_second_moment
+  )) > 0.4,
+  info = "The fallback fixture distinguishes upper from transposed orientation."
+)
+
+set.seed(812)
+fallback_draws = replicate(6000L, {
+  sampled_B = sample_fallback_B(fallback_Y)
+  sampled_B[1L, ]
+})
+fallback_empirical_second_moment = tcrossprod(fallback_draws) /
+  ncol(fallback_draws)
+fallback_second_moment_error = max(abs(
+  fallback_empirical_second_moment - fallback_expected_second_moment
+))
+expect_true(
+  fallback_second_moment_error < 0.03,
+  info = sprintf(
+    "Fixed256 upper-factor second-moment error is %.6g.",
+    fallback_second_moment_error
+  )
+)
+
+safe_Y = matrix(0, fallback_N, fallback_T)
+safe_design = rbind(
+  sqrt(fallback_prior_precision) * diag(fallback_N),
+  matrix(0, fallback_T, fallback_N)
+)
+safe_R = qr.R(qr(safe_design, LAPACK = TRUE))
+expect_true(
+  rcond(safe_R) > fallback_threshold,
+  info = "The RNG comparison fixture takes the safe QR branch."
+)
+set.seed(913)
+invisible(sample_fallback_B(safe_Y))
+safe_seed = .Random.seed
+set.seed(913)
+invisible(sample_fallback_B(fallback_Y))
+fallback_seed = .Random.seed
+expect_identical(
+  fallback_seed,
+  safe_seed,
+  info = "The fixed256 factorization consumes no random numbers."
+)
+
+dependent_prior = list(
+  B_nu = 3L,
+  B_V_inv = matrix(c(2, 0.25, 0.25, 1), fallback_N, fallback_N)
+)
+expect_silent(
+  chol(dependent_prior$B_V_inv),
+  info = "The dependent-restriction fixture has a full-SPD prior."
+)
+dependent_restriction = rbind(c(1, 0), c(2, 0))
+dependent_VB = list(
+  dependent_restriction,
+  matrix(c(0, 1), 1L, fallback_N)
+)
+expect_true(
+  qr(dependent_restriction)$rank < nrow(dependent_restriction),
+  info = "The restriction rows are linearly dependent."
+)
+expect_error(
+  sample_fallback_B(safe_Y, dependent_prior, dependent_VB),
+  pattern = "multiprecision Cholesky is not positive definite",
+  info = "A singular restricted precision errors instead of being repaired."
+)
