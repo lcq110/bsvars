@@ -90,9 +90,32 @@ arma::mat sample_A_heterosk1 (
     precision         = 0.5 * (precision + precision.t());
     rowvec  location  = ( prior_A_mean.row(n) * (pow(aux_hyper(n,1), -1) * prior_A_Vinv) + trans(zn_sigma) * Wn_sigma ) * trans(VA(n));
     
-    mat     precision_chol = trimatu(chol(precision));
+    mat     precision_chol;
+    if (!chol(precision_chol, precision)) {
+      // Factor the same precision from the augmented design without forming normal equations.
+      mat prior_A_Vinv_chol = trimatu(chol(prior_A_Vinv));
+      double prior_scale    = pow(aux_hyper(n,1), -0.5);
+      mat augmented_design  = join_cols(
+        prior_scale * prior_A_Vinv_chol * trans(VA(n)),
+        Wn_sigma * trans(VA(n))
+      );
+      vec augmented_response = join_cols(
+        prior_scale * prior_A_Vinv_chol * trans(prior_A_mean.row(n)),
+        zn_sigma
+      );
+      mat Q;
+      qr_econ(Q, precision_chol, augmented_design);
+      precision_chol = trimatu(precision_chol);
+
+      vec xx(rna, fill::randn);
+      vec draw = solve(precision_chol, trans(Q) * augmented_response + xx);
+      aux_A.row(n) = trans(draw) * VA(n);
+      continue;
+    }
+
+    precision_chol = trimatu(precision_chol);
     vec     xx(rna, fill::randn);
-    vec     draw      = solve(precision_chol, 
+    vec     draw      = solve(precision_chol,
                               solve(trans(precision_chol), trans(location)) + xx);
     aux_A.row(n)      = trans(draw) * VA(n);
   } // END n loop
