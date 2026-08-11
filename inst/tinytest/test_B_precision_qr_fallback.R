@@ -9,7 +9,7 @@ aux_sigma = matrix(1, N, T)
 Y = matrix(1e10, N, T)
 X = matrix(0, K, T)
 prior = list(
-  B_nu = 1L,
+  B_nu = N,
   B_V_inv = diag(N)
 )
 VB = rep(list(diag(N)), N)
@@ -113,7 +113,9 @@ silent_norm_squared = replicate(5000L, {
   )
   sum(sampled_B[1L, ]^2)
 })
-expected_norm_squared = (T + silent_prior$B_nu + 1) / 5
+expected_norm_squared = (
+  T + silent_prior$B_nu - N + 1
+) / silent_prior$B_V_inv[1L, 1L]
 expect_equal(
   mean(silent_norm_squared),
   expected_norm_squared,
@@ -159,7 +161,10 @@ orientation_precision = orientation_restriction %*%
 orientation_nu = orientation_T + orientation_prior$B_nu
 orientation_factor = chol(orientation_nu * solve(orientation_precision))
 orientation_alpha_second_moment = diag(
-  c((orientation_nu + 1) / orientation_nu, 1 / orientation_nu)
+  c(
+    (orientation_nu - orientation_N + 1) / orientation_nu,
+    1 / orientation_nu
+  )
 )
 expected_second_moment = t(orientation_factor) %*%
   orientation_alpha_second_moment %*%
@@ -258,7 +263,7 @@ fallback_reference_upper = rbind(
   c(0, fallback_U22)
 )
 fallback_alpha_second_moment = diag(c(
-  (fallback_posterior_nu + 1) / fallback_posterior_nu,
+  (fallback_posterior_nu - fallback_N + 1) / fallback_posterior_nu,
   1 / fallback_posterior_nu
 ))
 fallback_expected_second_moment = t(fallback_reference_upper) %*%
@@ -268,7 +273,7 @@ fallback_transposed_second_moment = fallback_reference_upper %*%
 expect_true(
   max(abs(
     fallback_expected_second_moment - fallback_transposed_second_moment
-  )) > 0.4,
+  )) > 0.25,
   info = "The fallback fixture distinguishes upper from transposed orientation."
 )
 
