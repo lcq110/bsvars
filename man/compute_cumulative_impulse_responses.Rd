@@ -7,14 +7,14 @@
 compute_cumulative_impulse_responses(posterior, horizon, standardise = FALSE)
 }
 \arguments{
-\item{posterior}{posterior estimation outcome obtained by running the \code{estimate} function.
+\item{posterior}{posterior estimation outcome obtained by running the \code{estimate} function. 
 The interpretation depends on the normalisation of the shocks
 using function \code{normalise()}. Verify if the default settings are appropriate.}
 
 \item{horizon}{a positive integer number denoting the forecast horizon for the impulse responses computations.}
 
-\item{standardise}{a logical value. If \code{TRUE}, the impulse responses are standardised
-so that the variables' own shocks at horizon 0 are equal to 1. Otherwise, the parameter estimates
+\item{standardise}{a logical value. If \code{TRUE}, the impulse responses are standardised 
+so that the variables' own shocks at horizon 0 are equal to 1. Otherwise, the parameter estimates 
 determine this magnitude.}
 }
 \value{
