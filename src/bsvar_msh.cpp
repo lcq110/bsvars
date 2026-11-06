@@ -105,38 +105,28 @@ Rcpp::List bsvar_msh_cpp (
     if (s % 200 == 0) checkUserInterrupt();
     
     if ( !normal ) {
-      try {
-        List df_tmp     = sample_df ( aux_df, adaptive_scale, aux_lambda, s, adptive_alpha_gamma );
-        aux_df          = as<vec>(df_tmp["aux_df"]);
-        adaptive_scale  = as<vec>(df_tmp["adaptive_scale"]);
-      } catch (std::runtime_error &e) {}
+      List df_tmp     = sample_df ( aux_df, adaptive_scale, aux_lambda, s, adptive_alpha_gamma );
+      aux_df          = as<vec>(df_tmp["aux_df"]);
+      adaptive_scale  = as<vec>(df_tmp["adaptive_scale"]);
       
       U               = aux_B * (Y - aux_A * X) / aux_sigma;
-      try {
-        aux_lambda      = sample_lambda ( aux_df, U );
-        aux_lambda_sqrt = sqrt(aux_lambda);
-        aux_hetero      = aux_sigma % aux_lambda_sqrt;
-      } catch (std::runtime_error &e) {}
+      aux_lambda      = sample_lambda ( aux_df, U );
+      aux_lambda_sqrt = sqrt(aux_lambda);
+      aux_hetero      = aux_sigma % aux_lambda_sqrt;
     }
     
     // sample aux_xi
     U                 = aux_B * (Y - aux_A * X) / aux_sigma;
-    try {
-      aux_xi            = sample_Markov_process_msh(aux_xi, U, aux_sigma2, aux_PR_TR, aux_pi_0, finiteM);
-    } catch (std::runtime_error &e) {}
+    aux_xi            = sample_Markov_process_msh(aux_xi, U, aux_sigma2, aux_PR_TR, aux_pi_0, finiteM);
     
     // sample aux_PR_TR
-    try {
-      List aux_PR_tmp   = sample_transition_probabilities(aux_PR_TR, aux_pi_0, aux_xi, prior, MSnotMIX);
-      aux_PR_TR         = as<mat>(aux_PR_tmp["PR_TR"]);
-      aux_pi_0          = as<vec>(aux_PR_tmp["pi_0"]);
-    } catch (std::runtime_error &e) {}
+    List aux_PR_tmp   = sample_transition_probabilities(aux_PR_TR, aux_pi_0, aux_xi, prior, MSnotMIX);
+    aux_PR_TR         = as<mat>(aux_PR_tmp["PR_TR"]);
+    aux_pi_0          = as<vec>(aux_PR_tmp["pi_0"]);
     
     // sample aux_sigma2
     U                 = aux_B * (Y - aux_A * X) / aux_lambda_sqrt;
-    try {
-      aux_sigma2        = sample_variances_msh(aux_sigma2, U, aux_xi, prior);
-    } catch (std::runtime_error &e) {}
+    aux_sigma2        = sample_variances_msh(aux_sigma2, U, aux_xi, prior);
     
     for (int t=0; t<T; t++) {
       aux_sigma.col(t)    = pow( aux_sigma2.col(aux_xi.col(t).index_max()) , 0.5 );
@@ -144,19 +134,13 @@ Rcpp::List bsvar_msh_cpp (
     aux_hetero      = aux_sigma % aux_lambda_sqrt;
     
     // sample aux_hyper
-    try {
-      aux_hyper         = sample_hyperparameters(aux_hyper, aux_B, aux_A, VB, VA, prior);
-    } catch (std::runtime_error &e) {}
+    aux_hyper         = sample_hyperparameters(aux_hyper, aux_B, aux_A, VB, VA, prior);
     
     // sample aux_B
-    try {
-      aux_B             = sample_B_heterosk1(aux_B, aux_A, aux_hyper, aux_hetero, Y, X, prior, VB);
-    } catch (std::runtime_error &e) {}
+    aux_B             = sample_B_heterosk1(aux_B, aux_A, aux_hyper, aux_hetero, Y, X, prior, VB);
     
     // sample aux_A
-    try {
-      aux_A             = sample_A_heterosk1(aux_A, aux_B, aux_hyper, aux_hetero, Y, X, prior, VA);
-    } catch (std::runtime_error &e) {}
+    aux_A             = sample_A_heterosk1(aux_A, aux_B, aux_hyper, aux_hetero, Y, X, prior, VA);
     U                 = aux_B * (Y - aux_A * X) / aux_sigma;
     
     if (s % thin == 0) {
@@ -201,4 +185,3 @@ Rcpp::List bsvar_msh_cpp (
     )
   );
 } // END bsvar_msh
-
