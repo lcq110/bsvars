@@ -44,5 +44,7 @@ compute_cumulative_impulse_responses <- function(posterior, horizon, standardise
   irfs            = compute_impulse_responses(posterior, horizon, standardise)
   for (h in 1:horizon) irfs[,,h + 1,] = irfs[,,h,] + irfs[,,h + 1,]
 
+  attr(irfs, "cumulative") = TRUE
+
   return(irfs)
 }
