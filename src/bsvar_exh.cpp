@@ -65,14 +65,14 @@ Rcpp::List bsvar_exh_cpp (
   vec   aux_df      = as<vec>(starting_values["df"]);
   mat   U;
   
-  const int   M     = aux_xi.n_rows;
+  const int   M     = aux_sigma2.n_cols;
   
   const int   SS     = floor(S / thin);
   
   cube  posterior_B(N, N, SS);
   cube  posterior_A(N, K, SS);
   cube  posterior_sigma2(N, M, SS);
-  cube  posterior_xi(M, T, SS);
+  cube  posterior_xi(1, T, SS);
   cube  posterior_hyper(2 * N + 1, 2, SS);
   cube  posterior_sigma(N, T, SS);
   cube  posterior_lambda(N, T, SS);
@@ -80,14 +80,19 @@ Rcpp::List bsvar_exh_cpp (
   
   int   ss = 0;
   for (int t=0; t<T; t++) {
-    aux_sigma.col(t)    = pow( aux_sigma2.col(aux_xi.col(t).index_max()) , 0.5 );
+    aux_sigma.col(t)    = pow( aux_sigma2.col(aux_xi(0,t)) , 0.5 );
   }
   
   aux_hetero = aux_sigma % aux_lambda_sqrt;
   
-  // the initial value for the adaptive_scale is set to the negative inverse of 
-  // Hessian for the posterior log_kenel for df evaluated at df = 30
-  double  adaptive_scale_init = abs(pow(0.25 * T * R::psigamma(15, 1) - T * 29 * pow(28, -2) - 2 * pow(29, -2), -1));
+  // the initial proposal variance is the inverse negative Hessian of the
+  // posterior log-kernel for df evaluated at df = 30
+  const double df_reference = 30;
+  const double negative_hessian =
+    0.25 * T * R::psigamma(0.5 * df_reference, 1) -
+    0.5 * T * (df_reference - 4) * std::pow(df_reference - 2, -2) -
+    2 * std::pow(df_reference - 1, -2);
+  double  adaptive_scale_init = 1 / std::sqrt(negative_hessian);
   vec     adaptive_scale(N, fill::value(adaptive_scale_init));
   
   for (int s=0; s<S; s++) {
@@ -113,12 +118,13 @@ Rcpp::List bsvar_exh_cpp (
     }
     
     // sample aux_sigma2
+    U                 = aux_B * (Y - aux_A * X) / aux_lambda_sqrt;
     try {
       aux_sigma2        = sample_variances_msh(aux_sigma2, U, aux_xi, prior);
     } catch (std::runtime_error &e) {}
     
     for (int t=0; t<T; t++) {
-      aux_sigma.col(t)    = pow( aux_sigma2.col(aux_xi.col(t).index_max()) , 0.5 );
+      aux_sigma.col(t)    = pow( aux_sigma2.col(aux_xi(0,t)) , 0.5 );
     }
     aux_hetero      = aux_sigma % aux_lambda_sqrt;
     
@@ -174,4 +180,3 @@ Rcpp::List bsvar_exh_cpp (
     )
   );
 } // END bsvar_exh_cpp
-

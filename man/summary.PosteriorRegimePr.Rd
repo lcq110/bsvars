@@ -2,7 +2,7 @@
 % Please edit documentation in R/summary.R
 \name{summary.PosteriorRegimePr}
 \alias{summary.PosteriorRegimePr}
-\title{Provides posterior summary of regime probabilities}
+\title{Provides posterior summary of regimes or regime probabilities}
 \usage{
 \method{summary}{PosteriorRegimePr}(object, ...)
 }
@@ -15,34 +15,31 @@ regime allocations.}
 }
 \value{
 A list reporting the posterior mean and standard deviations of the
-regime probabilities.
+realized regime indices or regime probabilities.
 }
 \description{
-Provides posterior summary of regime probabilities 
-including their mean, standard deviations, as well as 5 and 95 percentiles.
+Provides posterior summary of realized regime indices or regime
+probabilities, including their mean and standard deviations.
 }
 \examples{
-# specify the model
 specification  = specify_bsvar_msh$new(us_fiscal_lsuw)
-
-# run the burn-in
-burn_in        = estimate(specification, 10)
-
-# estimate the model
-posterior      = estimate(burn_in, 20)
+burn_in        = estimate(specification, 5)
+posterior      = estimate(burn_in, 5)
 
 # compute regime probabilities
 rp             = compute_regime_probabilities(posterior)
 rp_summary     = summary(rp)
+head(rp_summary$MarkovProcess1$regime) # browse the results
 
 # workflow with the pipe |>
 ############################################################
 us_fiscal_lsuw |>
   specify_bsvar_msh$new() |>
-  estimate(S = 10) |> 
-  estimate(S = 20) |> 
+  estimate(S = 5) |> 
+  estimate(S = 5) |> 
   compute_regime_probabilities() |>
   summary() -> rp_summary
+head(rp_summary$MarkovProcess1$regime) # browse the results
 
 }
 \seealso{

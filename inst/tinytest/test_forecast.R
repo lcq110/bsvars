@@ -40,6 +40,39 @@ expect_error(
 )
 
 
+# for specify_forecasts
+expect_true(
+  inherits(ff, "Forecasts"),
+  info = "specify_forecasts: output class is Forecasts."
+)
+
+
+# objects
+expect_true(
+  all(c(
+    "forecasts",
+    "forecast_mean",
+    "forecast_covariance"
+  ) %in% names(ff)),
+  info = "specify_forecasts: provides elements forecasts, forecast_mean, and forecast_covariance."
+)
+
+# forecasts is a numeric array
+expect_true(
+  is.array(ff$forecasts),
+  info = "specify_forecasts: output forecasts is an array."
+)
+expect_true(
+  is.numeric(ff$forecasts),
+  info = "specify_forecasts: output forecasts is numeric."
+)
+
+
+
+
+
+
+
 
 
 # for bsvar_msh
@@ -283,7 +316,7 @@ expect_true(
   info = "conditonal forecast: returns numeric array."
 )
 
-expect_error(
+expect_message(
   forecast(run_no1, horizon = 3, conditional_forecast = cf),
   info = "conditonal forecast: wrong value of horizon."
 )

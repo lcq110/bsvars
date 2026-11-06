@@ -110,7 +110,7 @@ specify_starting_values_bsvar_mix = R6::R6Class(
     #' @field PR_TR an \code{MxM} matrix of starting values for the probability matrix of the Markov process. Its rows must be identical and the elements of each row sum to 1 over the rows.
     PR_TR         = matrix(),
     
-    #' @field xi an \code{MxT} matrix of starting values for the Markov process indicator. Its columns are a chosen column of an identity matrix of order \code{M}.
+    #' @field xi a \code{1xT} matrix of starting values for the Markov process indicator with integer values from \code{0} to \code{M-1}.
     xi            = matrix(),
     
     #' @field pi_0 an \code{M}-vector of starting values for mixture components state probabilities. Its elements sum to 1.
@@ -146,10 +146,6 @@ specify_starting_values_bsvar_mix = R6::R6Class(
       stopifnot("Argument T must be a positive integer number." = T > 0 & T %% 1 == 0)
       stopifnot("Argument d must be a non-negative integer number." = d >= 0 & d %% 1 == 0)
       stopifnot("Argument finiteM must be a logical value." = is.logical(finiteM) & length(finiteM) == 1)
-      
-      if (!finiteM) {
-        M = 20
-      }
       
       super$initialize(A, B, N, p, M, T, d)
     } # END initialize
@@ -214,7 +210,9 @@ specify_bsvar_mix = R6::R6Class(
     #' of structural shocks. Value \code{"norm"} sets it to the normal distribution, 
     #' while value \code{"t"} sets the Student-t distribution.
     #' @param exogenous a \code{(T+p)xd} matrix of exogenous variables. 
-    #' @param stationary an \code{N} logical vector - its element set to \code{FALSE} sets the prior mean for the autoregressive parameters of the \code{N}th equation to the white noise process, otherwise to random walk.
+    #' @param stationary an \code{N} logical vector - its element set to \code{FALSE} sets 
+    #' the prior mean for the autoregressive parameters of the \code{N}th equation to the random walk process, 
+    #' otherwise to white noise.
     #' @param finiteM a logical value - if true a finite mixture model is estimated. Otherwise, a sparse mixture model is estimated in which \code{M=20} and the number of visited states is estimated.
     #' @return A new complete specification for the bsvar model with a zero-mean mixture of normals model for structural shocks, BSVARMIX.
     initialize = function(
@@ -243,9 +241,9 @@ specify_bsvar_mix = R6::R6Class(
       K             = N * p + 1 + d
       
       if (!finiteM) {
-        if ( M < 20 ) {
-          M = 20L
-          message("In the sparse mixture model the value of M is overwritten and set to 20.")
+        if ( M < 10 ) {
+          M = 10L
+          message("In the sparse mixture model the value of M is overwritten and set to 10.")
         }
       }
       self$finiteM  = finiteM

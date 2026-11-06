@@ -13,8 +13,9 @@
 #' @param type one of the values \code{"realized"}, \code{"filtered"}, \code{"forecasted"}, or \code{"smoothed"}
 #' denoting the type of probabilities to be computed.
 #' 
-#' @return An object of class PosteriorRegimePr, that is, an \code{MxTxS} array with attribute PosteriorRegimePr 
-#' containing \code{S} draws of the regime probabilities.
+#' @return An object of class PosteriorRegimePr. Realized regimes are returned as a
+#' compact zero-based \code{1xTxS} array (or \code{1xTxNxS} for HMSH); other types
+#' are returned as regime-probability arrays with first dimension \code{M}.
 #'
 #' @seealso \code{\link{estimate}}, \code{\link{summary}}
 #'
@@ -24,14 +25,9 @@
 #' Song, Y., and Woźniak, T., (2021) Markov Switching. \emph{Oxford Research Encyclopedia of Economics and Finance}, Oxford University Press, \doi{10.1093/acrefore/9780190625979.013.174}.
 #' 
 #' @examples
-#' # specify the model
 #' specification  = specify_bsvar_msh$new(us_fiscal_lsuw)
-#' 
-#' # run the burn-in
-#' burn_in        = estimate(specification, 10)
-#' 
-#' # estimate the model
-#' posterior      = estimate(burn_in, 20)
+#' burn_in        = estimate(specification, 5)
+#' posterior      = estimate(burn_in, 5)
 #' 
 #' # compute the posterior draws of realized regime indicators
 #' regimes        = compute_regime_probabilities(posterior)
@@ -43,8 +39,8 @@
 #' ############################################################
 #' us_fiscal_lsuw |>
 #'   specify_bsvar_msh$new() |>
-#'   estimate(S = 10) |> 
-#'   estimate(S = 20) -> posterior
+#'   estimate(S = 5) |> 
+#'   estimate(S = 5) -> posterior
 #' regimes        = compute_regime_probabilities(posterior)
 #' filtered       = compute_regime_probabilities(posterior, "filtered")
 #' 
@@ -76,9 +72,9 @@ compute_regime_probabilities.PosteriorBSVAREXH <- function(posterior, type = "re
   probs         = posteriors$xi
   
   class(probs)  = "PosteriorRegimePr"
-  M                 = dim(posterior$posterior$xi)[1]
+  attr(probs, "type") = type
   S                 = dim(posterior$posterior$xi)[3]
-  dimnames(probs)   = list(1:M, colnames(Y), 1:S)
+  dimnames(probs)   = list(1, colnames(Y), 1:S)
   
   return(probs)
 }
@@ -104,7 +100,6 @@ compute_regime_probabilities.PosteriorBSVARMSH <- function(posterior, type = c("
   posteriors    = posterior$posterior
   Y             = posterior$last_draw$data_matrices$Y
   X             = posterior$last_draw$data_matrices$X
-  
   if (type == "realized") {
     probs       = posteriors$xi
   } else {
@@ -123,9 +118,9 @@ compute_regime_probabilities.PosteriorBSVARMSH <- function(posterior, type = c("
   }
   
   class(probs)  = "PosteriorRegimePr"
-  M                 = dim(posterior$posterior$xi)[1]
+  attr(probs, "type") = type
   S                 = dim(posterior$posterior$xi)[3]
-  dimnames(probs)   = list(1:M, colnames(Y), 1:S)
+  dimnames(probs)   = list(1:dim(probs)[1], colnames(Y), 1:S)
   
   return(probs)
 }
@@ -142,14 +137,9 @@ compute_regime_probabilities.PosteriorBSVARMSH <- function(posterior, type = c("
 #' \code{PosteriorBSVARHMSH} obtained by running the \code{estimate} function.
 #' 
 #' @examples
-#' # specify the model
 #' specification  = specify_bsvar_hmsh$new(us_fiscal_lsuw)
-#' 
-#' # run the burn-in
-#' burn_in        = estimate(specification, 10)
-#' 
-#' # estimate the model
-#' posterior      = estimate(burn_in, 20)
+#' burn_in        = estimate(specification, 5)
+#' posterior      = estimate(burn_in, 5)
 #' 
 #' # compute the posterior draws of realized regime indicators
 #' regimes        = compute_regime_probabilities(posterior)
@@ -161,8 +151,8 @@ compute_regime_probabilities.PosteriorBSVARMSH <- function(posterior, type = c("
 #' ############################################################
 #' us_fiscal_lsuw |>
 #'   specify_bsvar_hmsh$new() |>
-#'   estimate(S = 10) |> 
-#'   estimate(S = 20) -> posterior
+#'   estimate(S = 5) |> 
+#'   estimate(S = 5) -> posterior
 #' regimes        = compute_regime_probabilities(posterior)
 #' filtered       = compute_regime_probabilities(posterior, "filtered")
 #' 
@@ -174,14 +164,14 @@ compute_regime_probabilities.PosteriorBSVARHMSH <- function(posterior, type = c(
   posteriors    = posterior$posterior
   Y             = posterior$last_draw$data_matrices$Y
   X             = posterior$last_draw$data_matrices$X
-  dims          = dim(posterior$posterior$xi) 
-  M               = dims[1]
+  dims          = dim(posterior$posterior$xi)
   N               = dims[3]
   S               = dims[4]
   
   if (type == "realized") {
     probs         = posteriors$xi
   } else {
+    M             = dim(posteriors$sigma2)[2]
     if (type == "filtered") {
       forecasted  = FALSE
       smoothed    = FALSE
@@ -194,14 +184,15 @@ compute_regime_probabilities.PosteriorBSVARHMSH <- function(posterior, type = c(
     }
     
     probs_tmp     = .Call(`_bsvars_bsvars_filter_forecast_smooth_hmsh`, posteriors, Y, X, forecasted, smoothed)
-    probs         = array(0, dims)
+    probs         = array(0, c(M, dims[-1]))
     for (s in 1:S) {
       probs[,,,s] = probs_tmp[s,1][[1]]
     }
   }
   
   class(probs)    = "PosteriorRegimePr"
-  dimnames(probs) = list(1:M, 1:dims[2], 1:N, 1:S)
+  attr(probs, "type") = type
+  dimnames(probs) = list(1:dim(probs)[1], 1:dims[2], 1:N, 1:S)
   
   return(probs)
 }
@@ -222,14 +213,9 @@ compute_regime_probabilities.PosteriorBSVARHMSH <- function(posterior, type = c(
 #' \code{PosteriorBSVARMIX} obtained by running the \code{estimate} function.
 #' 
 #' @examples
-#' # specify the model
 #' specification  = specify_bsvar_mix$new(us_fiscal_lsuw, p = 2, M = 2)
-#' 
-#' # run the burn-in
-#' burn_in        = estimate(specification, 10)
-#' 
-#' # estimate the model
-#' posterior      = estimate(burn_in, 20)
+#' burn_in        = estimate(specification, 5)
+#' posterior      = estimate(burn_in, 5)
 #' 
 #' # compute the posterior draws of realized regime indicators
 #' regimes        = compute_regime_probabilities(posterior)
@@ -241,8 +227,8 @@ compute_regime_probabilities.PosteriorBSVARHMSH <- function(posterior, type = c(
 #' ############################################################
 #' us_fiscal_lsuw |>
 #'   specify_bsvar_mix$new(p = 1, M = 2) |>
-#'   estimate(S = 10) |> 
-#'   estimate(S = 20) -> posterior
+#'   estimate(S = 5) |> 
+#'   estimate(S = 5) -> posterior
 #' regimes        = compute_regime_probabilities(posterior)
 #' filtered       = compute_regime_probabilities(posterior, "filtered")
 #' 
@@ -254,7 +240,6 @@ compute_regime_probabilities.PosteriorBSVARMIX <- function(posterior, type = c("
   posteriors    = posterior$posterior
   Y             = posterior$last_draw$data_matrices$Y
   X             = posterior$last_draw$data_matrices$X
-  
   if (type == "realized") {
     probs       = posteriors$xi
   } else {
@@ -273,9 +258,20 @@ compute_regime_probabilities.PosteriorBSVARMIX <- function(posterior, type = c("
   }
   
   class(probs)  = "PosteriorRegimePr"
-  M                 = dim(posterior$posterior$xi)[1]
+  attr(probs, "type") = type
   S                 = dim(posterior$posterior$xi)[3]
-  dimnames(probs)   = list(1:M, colnames(Y), 1:S)
+  dimnames(probs)   = list(1:dim(probs)[1], colnames(Y), 1:S)
   
   return(probs)
+}
+
+#' @export
+print.PosteriorRegimePr <- function(x, ...) {
+  if (identical(attr(x, "type"), "realized")) {
+    cat("Posterior draws of realized regime indices\n")
+  } else {
+    cat("Posterior draws of regime probabilities\n")
+  }
+  cat("An array of dimensions:", paste(dim(x), collapse = " x "), "\n")
+  invisible(x)
 }

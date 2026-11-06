@@ -18,7 +18,7 @@
 \arguments{
 \item{x}{an object of class PosteriorRegimePr obtained using the
 \code{compute_regime_probabilities()} function containing posterior draws of 
-regime probabilities.}
+compact realized regime indices or regime probabilities.}
 
 \item{probability}{a parameter determining the interval to be plotted. The 
 interval stretches from the \code{0.5 * (1 - probability)} to 
@@ -39,14 +39,13 @@ interval stretches from the \code{0.5 * (1 - probability)} to
 \description{
 Plots of estimated regime probabilities of Markov-switching 
 heteroskedasticity or allocations of normal-mixture components including their 
-median and percentiles.
+median and percentiles. Compact zero-based realized regime indices are displayed
+using the equivalent regime indicators.
 }
 \examples{
-data(us_fiscal_lsuw)                                  # upload data
-set.seed(123)                                         # set seed
 specification  = specify_bsvar_msh$new(us_fiscal_lsuw)# specify model
-burn_in        = estimate(specification, 10)          # run the burn-in
-posterior      = estimate(burn_in, 20, thin = 1)      # estimate the model
+burn_in        = estimate(specification, 5)           # run the burn-in
+posterior      = estimate(burn_in, 5)                 # estimate the model
 
 # compute regime probabilities
 rp             = compute_regime_probabilities(posterior)
@@ -54,11 +53,10 @@ plot(rp)                                              # plot
 
 # workflow with the pipe |>
 ############################################################
-set.seed(123)
 us_fiscal_lsuw |>
   specify_bsvar_msh$new() |>
-  estimate(S = 10) |> 
-  estimate(S = 20, thin = 1) |> 
+  estimate(S = 5) |> 
+  estimate(S = 5) |> 
   compute_regime_probabilities() |>
   plot()
 

@@ -69,6 +69,12 @@ verify_volatility <- function(posterior) {
 }
 
 
+#' @export
+print.SDDRvolatility <- function(x, ...) {
+  cat("Verify structural shocks homoskedasticity using Bayes factor.\n")
+  cat("lnSDDRs:", x$logSDDR, "\n")
+  invisible(x)
+}
 
 
 
@@ -488,7 +494,12 @@ verify_normality <- function(posterior) {
 }
 
 
-
+#' @export
+print.SDDRnormality <- function(x, ...) {
+  cat("Verify structural shocks normality using Bayes factor.\n")
+  cat("lnSDDRs:", x$logSDDR, "\n")
+  invisible(x)
+}
 
 
 #' @inherit verify_normality
@@ -862,6 +873,15 @@ verify_autoregression <- function(posterior, hypothesis) {
 
 
 
+#' @export
+print.SDDRautoregression <- function(x, ...) {
+  cat("Verify restrictions on autoregressive parameters using Bayes factor.\n")
+  cat("lnSDDRs:", x$logSDDR, "\n")
+  invisible(x)
+}
+
+
+
 
 #' @inherit verify_autoregression
 #' @method verify_autoregression PosteriorBSVAR
@@ -1161,7 +1181,7 @@ verify_autoregression.PosteriorBSVART <- function(posterior, hypothesis) {
   Y               = posterior$last_draw$data_matrices$Y
   X               = posterior$last_draw$data_matrices$X
 
-  just_posterior$sigma = sqrt(just_posterior$lambda)
+  just_posterior$sigma = array(1, dim(just_posterior$lambda))
   
   hypothesis_cpp  = hypothesis
   hypothesis_cpp[is.na(hypothesis_cpp)] = 999
@@ -1248,6 +1268,13 @@ verify_identification <- function(posterior) {
 }
 
 
+
+#' @export
+print.SDDRidSV <- function(x, ...) {
+  cat("Verify structural shocks identification using Bayes factor.\n")
+  cat("lnSDDRs:", x$logSDDR, "\n")
+  invisible(x)
+}
 
 
 

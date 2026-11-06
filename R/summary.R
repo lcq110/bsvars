@@ -22,28 +22,20 @@
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # upload data
-#' data(us_fiscal_lsuw)
-#' 
-#' # specify the model and set seed
-#' set.seed(123)
-#' specification  = specify_bsvar$new(us_fiscal_lsuw)
-#' 
-#' # run the burn-in
-#' burn_in        = estimate(specification, 10)
-#' 
-#' # estimate the model
-#' posterior      = estimate(burn_in, 20)
-#' summary(posterior)
+#' specification = specify_bsvar$new(us_fiscal_lsuw)
+#' burn_in      = estimate(specification, 5)
+#' posterior    = estimate(burn_in, 5)
+#' summ         = summary(posterior)
+#' summ
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
-#' set.seed(123)
 #' us_fiscal_lsuw |>
 #'   specify_bsvar$new() |>
-#'   estimate(S = 10) |> 
-#'   estimate(S = 20) |> 
-#'   summary()
+#'   estimate(S = 5) |> 
+#'   estimate(S = 5) |> 
+#'   summary() -> summ
+#' summ
 #' 
 #' @export
 summary.PosteriorBSVAR = function(
@@ -51,18 +43,11 @@ summary.PosteriorBSVAR = function(
     ...
 ) {
   
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Posterior summary of the parameters             |\n",
-    "**************************************************|\n"
-  )
-
   N         = dim(object$posterior$A)[1]
   p         = object$last_draw$p
   K         = dim(object$last_draw$data_matrices$X)[1]
   d         = K - N * p
+  var_names = rownames(object$last_draw$data_matrices$Y)
   
   out       = list()
   out$B     = list()
@@ -108,8 +93,8 @@ summary.PosteriorBSVAR = function(
     rownames(out$A[[n]]) = Anames
   } # END n loop
   
-  names(out$B) = paste0("equation", 1:N)
-  names(out$A) = paste0("equation", 1:N)
+  names(out$B) = var_names
+  names(out$A) = var_names
   
   for (i in 1:2) {
     out$hyper[[i]] = cbind(
@@ -164,28 +149,20 @@ summary.PosteriorBSVAR = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # upload data
-#' data(us_fiscal_lsuw)
-#' 
-#' # specify the model and set seed
-#' set.seed(123)
 #' specification  = specify_bsvar_sv$new(us_fiscal_lsuw)
-#' 
-#' # run the burn-in
-#' burn_in        = estimate(specification, 10)
-#' 
-#' # estimate the model
-#' posterior      = estimate(burn_in, 20)
-#' summary(posterior)
+#' burn_in        = estimate(specification, 5)
+#' posterior      = estimate(burn_in, 5)
+#' summ           = summary(posterior)
+#' summ
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
-#' set.seed(123)
 #' us_fiscal_lsuw |>
 #'   specify_bsvar_sv$new() |>
-#'   estimate(S = 10) |> 
-#'   estimate(S = 20) |> 
-#'   summary()
+#'   estimate(S = 5) |> 
+#'   estimate(S = 5) |> 
+#'   summary() -> summ
+#' summ
 #' 
 #' @export
 summary.PosteriorBSVARSV = function(
@@ -193,18 +170,11 @@ summary.PosteriorBSVARSV = function(
     ...
 ) {
   
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Posterior summary of the parameters             |\n",
-    "**************************************************|\n"
-  )
-  
   N         = dim(object$posterior$A)[1]
   p         = object$last_draw$p
   K         = dim(object$last_draw$data_matrices$X)[1]
   d         = K - N * p
+  var_names = rownames(object$last_draw$data_matrices$Y)
   
   out       = list()
   out$B     = list()
@@ -250,8 +220,8 @@ summary.PosteriorBSVARSV = function(
     rownames(out$A[[n]]) = Anames
   } # END n loop
   
-  names(out$B) = paste0("equation", 1:N)
-  names(out$A) = paste0("equation", 1:N)
+  names(out$B) = var_names
+  names(out$A) = var_names
   
   for (i in 1:2) {
     out$hyper[[i]] = cbind(
@@ -308,23 +278,20 @@ summary.PosteriorBSVARSV = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # specify the model and set seed
 #' spec  = specify_bsvar_exh$new(us_fiscal_lsuw)
-#' 
-#' # run the burn-in
-#' burn  = estimate(spec, 10)
-#' 
-#' # estimate the model
-#' post  = estimate(burn, 10)
-#' summary(post)
+#' burn  = estimate(spec, 5)
+#' post  = estimate(burn, 5)
+#' summ  = summary(post)
+#' summ
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
 #' us_fiscal_lsuw |>
 #'   specify_bsvar_exh$new() |>
-#'   estimate(S = 10) |> 
-#'   estimate(S = 10) |> 
-#'   summary()
+#'   estimate(S = 5) |> 
+#'   estimate(S = 5) |> 
+#'   summary() -> summ
+#' summ
 #' 
 #' @export
 summary.PosteriorBSVAREXH = function(
@@ -332,18 +299,11 @@ summary.PosteriorBSVAREXH = function(
     ...
 ) {
   
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Posterior summary of the parameters             |\n",
-    "**************************************************|\n"
-  )
-  
   N         = dim(object$posterior$A)[1]
   p         = object$last_draw$p
   K         = dim(object$last_draw$data_matrices$X)[1]
   d         = K - N * p
+  var_names = rownames(object$last_draw$data_matrices$Y)
   
   out       = list()
   out$B     = list()
@@ -389,8 +349,8 @@ summary.PosteriorBSVAREXH = function(
     rownames(out$A[[n]]) = Anames
   } # END n loop
   
-  names(out$B) = paste0("equation", 1:N)
-  names(out$A) = paste0("equation", 1:N)
+  names(out$B) = var_names
+  names(out$A) = var_names
   
   for (i in 1:2) {
     out$hyper[[i]] = cbind(
@@ -446,28 +406,20 @@ summary.PosteriorBSVAREXH = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # upload data
-#' data(us_fiscal_lsuw)
-#' 
-#' # specify the model and set seed
-#' set.seed(123)
 #' specification  = specify_bsvar_msh$new(us_fiscal_lsuw)
-#' 
-#' # run the burn-in
-#' burn_in        = estimate(specification, 10)
-#' 
-#' # estimate the model
-#' posterior      = estimate(burn_in, 20)
-#' summary(posterior)
+#' burn_in        = estimate(specification, 5)
+#' posterior      = estimate(burn_in, 5)
+#' summ           = summary(posterior)
+#' summ
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
-#' set.seed(123)
 #' us_fiscal_lsuw |>
 #'   specify_bsvar_msh$new() |>
-#'   estimate(S = 10) |> 
-#'   estimate(S = 20) |> 
-#'   summary()
+#'   estimate(S = 5) |> 
+#'   estimate(S = 5) |> 
+#'   summary() -> summ
+#' summ
 #' 
 #' @export
 summary.PosteriorBSVARMSH = function(
@@ -475,18 +427,11 @@ summary.PosteriorBSVARMSH = function(
     ...
 ) {
   
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Posterior summary of the parameters             |\n",
-    "**************************************************|\n"
-  )
-  
   N         = dim(object$posterior$A)[1]
   p         = object$last_draw$p
   K         = dim(object$last_draw$data_matrices$X)[1]
   d         = K - N * p
+  var_names = rownames(object$last_draw$data_matrices$Y)
   
   out       = list()
   out$B     = list()
@@ -532,8 +477,8 @@ summary.PosteriorBSVARMSH = function(
     rownames(out$A[[n]]) = Anames
   } # END n loop
   
-  names(out$B) = paste0("equation", 1:N)
-  names(out$A) = paste0("equation", 1:N)
+  names(out$B) = var_names
+  names(out$A) = var_names
   
   for (i in 1:2) {
     out$hyper[[i]] = cbind(
@@ -587,23 +532,20 @@ summary.PosteriorBSVARMSH = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # specify the model
 #' specification  = specify_bsvar_msh$new(us_fiscal_lsuw)
-#' 
-#' # run the burn-in
-#' burn_in        = estimate(specification, 10)
-#' 
-#' # estimate the model
-#' posterior      = estimate(burn_in, 20)
-#' summary(posterior)
+#' burn_in        = estimate(specification, 5)
+#' posterior      = estimate(burn_in, 5)
+#' summ           = summary(posterior)
+#' summ$B$equation1[,1] # access posterior mean
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
 #' us_fiscal_lsuw |>
 #'   specify_bsvar_msh$new() |>
-#'   estimate(S = 10) |> 
-#'   estimate(S = 20) |> 
-#'   summary()
+#'   estimate(S = 5) |> 
+#'   estimate(S = 5) |> 
+#'   summary() -> summ
+#' summ$B$equation1[,1] # access posterior mean
 #' 
 #' @export
 summary.PosteriorBSVARHMSH = function(
@@ -611,18 +553,11 @@ summary.PosteriorBSVARHMSH = function(
     ...
 ) {
   
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Posterior summary of the parameters             |\n",
-    "**************************************************|\n"
-  )
-  
   N         = dim(object$posterior$A)[1]
   p         = object$last_draw$p
   K         = dim(object$last_draw$data_matrices$X)[1]
   d         = K - N * p
+  var_names = rownames(object$last_draw$data_matrices$Y)
   
   out       = list()
   out$B     = list()
@@ -668,8 +603,8 @@ summary.PosteriorBSVARHMSH = function(
     rownames(out$A[[n]]) = Anames
   } # END n loop
   
-  names(out$B) = paste0("equation", 1:N)
-  names(out$A) = paste0("equation", 1:N)
+  names(out$B) = var_names
+  names(out$A) = var_names
   
   for (i in 1:2) {
     out$hyper[[i]] = cbind(
@@ -721,28 +656,21 @@ summary.PosteriorBSVARHMSH = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # upload data
-#' data(us_fiscal_lsuw)
-#' 
-#' # specify the model and set seed
-#' set.seed(123)
 #' specification  = specify_bsvar_mix$new(us_fiscal_lsuw)
-#' 
-#' # run the burn-in
-#' burn_in        = estimate(specification, 10)
-#' 
-#' # estimate the model
-#' posterior      = estimate(burn_in, 20)
-#' summary(posterior)
+#' burn_in        = estimate(specification, 5)
+#' posterior      = estimate(burn_in, 5)
+#' summ           = summary(posterior)
+#' summ$A$equation1[,1] # access posterior means
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
 #' set.seed(123)
 #' us_fiscal_lsuw |>
 #'   specify_bsvar_mix$new() |>
-#'   estimate(S = 10) |> 
-#'   estimate(S = 20) |> 
-#'   summary()
+#'   estimate(S = 5) |> 
+#'   estimate(S = 5) |> 
+#'   summary() -> summ
+#' summ$A$equation1[,1] # access posterior means
 #' 
 #' @export
 summary.PosteriorBSVARMIX = function(
@@ -750,18 +678,11 @@ summary.PosteriorBSVARMIX = function(
     ...
 ) {
   
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Posterior summary of the parameters             |\n",
-    "**************************************************|\n"
-  )
-  
   N         = dim(object$posterior$A)[1]
   p         = object$last_draw$p
   K         = dim(object$last_draw$data_matrices$X)[1]
   d         = K - N * p
+  var_names = rownames(object$last_draw$data_matrices$Y)
   
   out       = list()
   out$B     = list()
@@ -807,8 +728,8 @@ summary.PosteriorBSVARMIX = function(
     rownames(out$A[[n]]) = Anames
   } # END n loop
   
-  names(out$B) = paste0("equation", 1:N)
-  names(out$A) = paste0("equation", 1:N)
+  names(out$B) = var_names
+  names(out$A) = var_names
   
   for (i in 1:2) {
     out$hyper[[i]] = cbind(
@@ -861,28 +782,21 @@ summary.PosteriorBSVARMIX = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # upload data
-#' data(us_fiscal_lsuw)
-#' 
-#' # specify the model and set seed
-#' set.seed(123)
 #' specification  = specify_bsvar_t$new(us_fiscal_lsuw)
-#' 
-#' # run the burn-in
-#' burn_in        = estimate(specification, 10)
-#' 
-#' # estimate the model
-#' posterior      = estimate(burn_in, 20)
-#' summary(posterior)
+#' burn_in        = estimate(specification, 5)
+#' posterior      = estimate(burn_in, 5)
+#' summ           = summary(posterior)
+#' summ$A$equation1[,1] # access posterior means
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
 #' set.seed(123)
 #' us_fiscal_lsuw |>
 #'   specify_bsvar_t$new() |>
-#'   estimate(S = 10) |> 
-#'   estimate(S = 20) |> 
-#'   summary()
+#'   estimate(S = 5) |> 
+#'   estimate(S = 5) |> 
+#'   summary() -> summ
+#' summ$A$equation1[,1] # access posterior means
 #' 
 #' @export
 summary.PosteriorBSVART = function(
@@ -890,18 +804,11 @@ summary.PosteriorBSVART = function(
     ...
 ) {
   
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Posterior summary of the parameters             |\n",
-    "**************************************************|\n"
-  )
-  
   N         = dim(object$posterior$A)[1]
   p         = object$last_draw$p
   K         = dim(object$last_draw$data_matrices$X)[1]
   d         = K - N * p
+  var_names = rownames(object$last_draw$data_matrices$Y)
   
   out       = list()
   out$B     = list()
@@ -947,8 +854,8 @@ summary.PosteriorBSVART = function(
     rownames(out$A[[n]]) = Anames
   } # END n loop
   
-  names(out$B) = paste0("equation", 1:N)
-  names(out$A) = paste0("equation", 1:N)
+  names(out$B) = var_names
+  names(out$A) = var_names
   
   for (i in 1:2) {
     out$hyper[[i]] = cbind(
@@ -1010,22 +917,14 @@ summary.PosteriorBSVART = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # upload data
-#' data(us_fiscal_lsuw)
-#' 
-#' # specify the model and set seed
-#' set.seed(123)
 #' specification  = specify_bsvar_sv$new(us_fiscal_lsuw)
-#' 
-#' # run the burn-in
 #' burn_in        = estimate(specification, 5)
-#' 
-#' # estimate the model
 #' posterior      = estimate(burn_in, 5)
 #' 
 #' # compute structural shocks' conditional standard deviations
 #' sigma          = compute_conditional_sd(posterior)
 #' sigma_summary  = summary(sigma)
+#' sigma_summary$shock1[,1] # access posterior mean of shock1
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
@@ -1036,6 +935,7 @@ summary.PosteriorBSVART = function(
 #'   estimate(S = 5) |> 
 #'   compute_conditional_sd() |>
 #'   summary() -> sigma_summary
+#' sigma_summary$shock1[,1]
 #' 
 #' @export
 summary.PosteriorSigma = function(
@@ -1044,15 +944,6 @@ summary.PosteriorSigma = function(
 ) {
   
   stopifnot("The model is homoskedastic. Conditional sd is equal to 1 for all variables and periods." = any(object != 1))
-  
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Posterior summary of structural shocks'         |\n",
-    "    conditional standard deviations               |\n",
-    "**************************************************|\n"
-  )
   
   posterior_sigma = object
   
@@ -1100,46 +991,30 @@ summary.PosteriorSigma = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # upload data
-#' data(us_fiscal_lsuw)
-#' 
-#' # specify the model and set seed
-#' set.seed(123)
 #' specification  = specify_bsvar$new(us_fiscal_lsuw)
-#' 
-#' # run the burn-in
-#' burn_in        = estimate(specification, 10)
-#' 
-#' # estimate the model
-#' posterior      = estimate(burn_in, 20)
+#' burn_in        = estimate(specification, 5)
+#' posterior      = estimate(burn_in, 5)
 #' 
 #' # compute fitted values
 #' fitted         = compute_fitted_values(posterior)
 #' fitted_summary = summary(fitted)
+#' fitted_summary$ttr[,1] # access posterior mean of ttr
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
-#' set.seed(123)
 #' us_fiscal_lsuw |>
 #'   specify_bsvar$new() |>
-#'   estimate(S = 10) |> 
-#'   estimate(S = 20) |> 
+#'   estimate(S = 5) |> 
+#'   estimate(S = 5) |> 
 #'   compute_fitted_values() |>
 #'   summary() -> fitted_summary
+#' fitted_summary$ttr[,1] # access posterior mean of ttr
 #' 
 #' @export
 summary.PosteriorFitted = function(
     object,
     ...
 ) {
-  
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Posterior summary of fitted values              |\n",
-    "**************************************************|\n"
-  )
   
   N         = dim(object)[1]
   T         = dim(object)[2]
@@ -1155,7 +1030,7 @@ summary.PosteriorFitted = function(
     rownames(out[[n]]) = 1:T
   } # END n loop
   
-  names(out) = paste0("variable", 1:N)
+  names(out) = dimnames(object)[[1]]
   
   return(out)
 } # END summary.PosteriorFitted
@@ -1190,32 +1065,24 @@ summary.PosteriorFitted = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # upload data
-#' data(us_fiscal_lsuw)
-#' 
-#' # specify the model and set seed
-#' set.seed(123)
 #' specification  = specify_bsvar$new(diff(us_fiscal_lsuw))
-#' 
-#' # run the burn-in
-#' burn_in        = estimate(specification, 10)
-#' 
-#' # estimate the model
-#' posterior      = estimate(burn_in, 20)
+#' burn_in        = estimate(specification, 5)
+#' posterior      = estimate(burn_in, 5)
 #' 
 #' # compute historical decompositions
 #' hds            = compute_historical_decompositions(posterior)
 #' hds_summary    = summary(hds)
+#' head(hds_summary$gdp) # browse the contributions
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
-#' set.seed(123)
 #' diff(us_fiscal_lsuw) |>
 #'   specify_bsvar$new() |>
-#'   estimate(S = 10) |> 
-#'   estimate(S = 20) |> 
+#'   estimate(S = 5) |> 
+#'   estimate(S = 5) |> 
 #'   compute_historical_decompositions() |>
 #'   summary() -> hds_summary
+#' hds_summary$gdp # browse the contributions
 #' 
 #' @export
 summary.PosteriorHD = function(
@@ -1223,16 +1090,9 @@ summary.PosteriorHD = function(
     ...
 ) {
   
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Posterior means of historical decompositions    |\n",
-    "**************************************************|\n"
-  )
-  
   N         = dim(object)[1]
   T         = dim(object)[3]
+  var_names = dimnames(object)[[1]]
   
   out       = list()
   hds       = apply(object, 1:3, mean)
@@ -1242,7 +1102,7 @@ summary.PosteriorHD = function(
     rownames(out[[n]]) = 1:T
   } # END n loop
   
-  names(out) = paste0("variable", 1:N)
+  names(out) = var_names
   
   return(out)
 } # END summary.PosteriorHD
@@ -1275,32 +1135,25 @@ summary.PosteriorHD = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # upload data
-#' data(us_fiscal_lsuw)
-#' 
-#' # specify the model and set seed
-#' set.seed(123)
 #' specification  = specify_bsvar$new(us_fiscal_lsuw)
-#' 
-#' # run the burn-in
-#' burn_in        = estimate(specification, 10)
-#' 
-#' # estimate the model
-#' posterior      = estimate(burn_in, 20)
+#' burn_in        = estimate(specification, 5)
+#' posterior      = estimate(burn_in, 5)
 #' 
 #' # compute impulse responses
 #' irf            = compute_impulse_responses(posterior, horizon = 4)
 #' irf_summary    = summary(irf)
+#' irf_summary$shock1 # inspect IRFs of the first shock
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
 #' set.seed(123)
 #' us_fiscal_lsuw |>
 #'   specify_bsvar$new() |>
-#'   estimate(S = 10) |> 
-#'   estimate(S = 20) |> 
+#'   estimate(S = 5) |> 
+#'   estimate(S = 5) |> 
 #'   compute_impulse_responses(horizon = 4) |>
 #'   summary() -> irf_summary
+#' irf_summary$shock1 # inspect IRFs of the first shock
 #' 
 #' @export
 summary.PosteriorIR = function(
@@ -1308,16 +1161,10 @@ summary.PosteriorIR = function(
     ...
 ) {
   
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Posterior summary of impulse responses          |\n",
-    "**************************************************|\n"
-  )
-  
   N         = dim(object)[1]
   H         = dim(object)[3] - 1
+  
+  var_names = dimnames(object)[[1]]
   
   out       = list()
   for (n in 1:N) {
@@ -1331,7 +1178,7 @@ summary.PosteriorIR = function(
       colnames(out[[n]][[i]]) = c("mean", "sd", "5% quantile", "95% quantile")
       rownames(out[[n]][[i]]) = 0:H
     } # END i loop
-    names(out[[n]]) = paste0("variable", 1:N)
+    names(out[[n]]) = var_names
   } # END n loop
   names(out) = paste0("shock", 1:N)
   
@@ -1343,10 +1190,10 @@ summary.PosteriorIR = function(
 
 
 
-#' @title Provides posterior summary of regime probabilities
+#' @title Provides posterior summary of regimes or regime probabilities
 #'
-#' @description Provides posterior summary of regime probabilities 
-#' including their mean, standard deviations, as well as 5 and 95 percentiles.
+#' @description Provides posterior summary of realized regime indices or regime
+#' probabilities, including their mean and standard deviations.
 #' 
 #' @param object an object of class PosteriorRegimePr obtained using the
 #' \code{compute_regime_probabilities()} function containing posterior draws of 
@@ -1354,7 +1201,7 @@ summary.PosteriorIR = function(
 #' @param ... additional arguments affecting the summary produced.
 #' 
 #' @return A list reporting the posterior mean and standard deviations of the
-#' regime probabilities.
+#' realized regime indices or regime probabilities.
 #' 
 #' @method summary PosteriorRegimePr
 #' 
@@ -1363,27 +1210,24 @@ summary.PosteriorIR = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # specify the model
 #' specification  = specify_bsvar_msh$new(us_fiscal_lsuw)
-#' 
-#' # run the burn-in
-#' burn_in        = estimate(specification, 10)
-#' 
-#' # estimate the model
-#' posterior      = estimate(burn_in, 20)
+#' burn_in        = estimate(specification, 5)
+#' posterior      = estimate(burn_in, 5)
 #' 
 #' # compute regime probabilities
 #' rp             = compute_regime_probabilities(posterior)
 #' rp_summary     = summary(rp)
+#' head(rp_summary$MarkovProcess1$regime) # browse the results
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
 #' us_fiscal_lsuw |>
 #'   specify_bsvar_msh$new() |>
-#'   estimate(S = 10) |> 
-#'   estimate(S = 20) |> 
+#'   estimate(S = 5) |> 
+#'   estimate(S = 5) |> 
 #'   compute_regime_probabilities() |>
 #'   summary() -> rp_summary
+#' head(rp_summary$MarkovProcess1$regime) # browse the results
 #' 
 #' @export
 summary.PosteriorRegimePr = function(
@@ -1391,15 +1235,9 @@ summary.PosteriorRegimePr = function(
     ...
 ) {
   
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Posterior summary of regime probabilities       |\n",
-    "**************************************************|\n"
-  )
   dims      = dim(object)
-  M         = dims[1]
+  realized  = identical(attr(object, "type"), "realized")
+  M         = if (realized) 1 else dims[1]
   T         = dims[2]
   N         = 1  
   if ( length(dims) == 4 ) {
@@ -1425,7 +1263,7 @@ summary.PosteriorRegimePr = function(
       colnames(out_n[[m]]) = c("mean", "sd")
       rownames(out_n[[m]]) = 1:T
     } # END n loop
-    names(out_n)    = paste0("regime", 1:M)
+    names(out_n)    = if (realized) "regime" else paste0("regime", 1:M)
     out[[n]]        = out_n
   }
   
@@ -1459,46 +1297,31 @@ summary.PosteriorRegimePr = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # upload data
-#' data(us_fiscal_lsuw)
-#' 
-#' # specify the model and set seed
-#' set.seed(123)
 #' specification  = specify_bsvar$new(us_fiscal_lsuw)
-#' 
-#' # run the burn-in
-#' burn_in        = estimate(specification, 10)
-#' 
-#' # estimate the model
-#' posterior      = estimate(burn_in, 20)
+#' burn_in        = estimate(specification, 5)
+#' posterior      = estimate(burn_in, 5)
 #' 
 #' # compute structural shocks
 #' shocks         = compute_structural_shocks(posterior)
 #' shocks_summary = summary(shocks)
+#' head(shocks_summary$shock1)
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
 #' set.seed(123)
 #' us_fiscal_lsuw |>
 #'   specify_bsvar$new() |>
-#'   estimate(S = 10) |> 
-#'   estimate(S = 20) |> 
+#'   estimate(S = 5) |> 
+#'   estimate(S = 5) |> 
 #'   compute_structural_shocks() |>
 #'   summary() -> shocks_summary
+#' head(shocks_summary$shock1)
 #' 
 #' @export
 summary.PosteriorShocks = function(
     object,
     ...
 ) {
-  
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Posterior summary of structural shocks          |\n",
-    "**************************************************|\n"
-  )
   
   N         = dim(object)[1]
   T         = dim(object)[2]
@@ -1545,32 +1368,24 @@ summary.PosteriorShocks = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # upload data
-#' data(us_fiscal_lsuw)
-#' 
-#' # specify the model and set seed
-#' set.seed(123)
 #' specification  = specify_bsvar$new(us_fiscal_lsuw)
-#' 
-#' # run the burn-in
-#' burn_in        = estimate(specification, 10)
-#' 
-#' # estimate the model
-#' posterior      = estimate(burn_in, 20)
+#' burn_in        = estimate(specification, 5)
+#' posterior      = estimate(burn_in, 5)
 #' 
 #' # compute forecast error variance decompositions
 #' fevd           = compute_variance_decompositions(posterior, horizon = 4)
 #' fevd_summary   = summary(fevd)
+#' fevd_summary
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
-#' set.seed(123)
 #' us_fiscal_lsuw |>
 #'   specify_bsvar$new() |>
-#'   estimate(S = 10) |> 
-#'   estimate(S = 20) |> 
+#'   estimate(S = 5) |> 
+#'   estimate(S = 5) |> 
 #'   compute_variance_decompositions(horizon = 4) |>
 #'   summary() -> fevd_summary
+#' fevd_summary
 #' 
 #' @export
 summary.PosteriorFEVD = function(
@@ -1578,17 +1393,9 @@ summary.PosteriorFEVD = function(
     ...
 ) {
   
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Posterior means of forecast error               |\n",
-    "    variance decompositions                       |\n",
-    "**************************************************|\n"
-  )
-  
   N         = dim(object)[1]
   H         = dim(object)[3] - 1
+  var_names = dimnames(object)[[1]]
   
   fevd      = apply(object, 1:3, mean)
   out       = list()
@@ -1597,7 +1404,7 @@ summary.PosteriorFEVD = function(
     colnames(out[[n]]) = paste0("shock", 1:N)
     rownames(out[[n]]) = 0:H
   } # END n loop
-  names(out) = paste0("variable", 1:N)
+  names(out) = var_names
   
   return(out)
 } # END summary.PosteriorFEVD
@@ -1627,32 +1434,24 @@ summary.PosteriorFEVD = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # upload data
-#' data(us_fiscal_lsuw)
-#' 
-#' # specify the model and set seed
-#' set.seed(123)
 #' specification  = specify_bsvar$new(us_fiscal_lsuw)
-#' 
-#' # run the burn-in
-#' burn_in        = estimate(specification, 10)
-#' 
-#' # estimate the model
-#' posterior      = estimate(burn_in, 20)
+#' burn_in        = estimate(specification, 5)
+#' posterior      = estimate(burn_in, 5)
 #' 
 #' # forecast
 #' fore           = forecast(posterior, horizon = 2)
 #' fore_summary   = summary(fore)
+#' fore_summary$variable1
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
-#' set.seed(123)
 #' us_fiscal_lsuw |>
 #'   specify_bsvar$new() |>
-#'   estimate(S = 10) |> 
-#'   estimate(S = 20) |> 
+#'   estimate(S = 5) |> 
+#'   estimate(S = 5) |> 
 #'   forecast(horizon = 2) |>
 #'   summary() -> fore_summary
+#' fore_summary$variable1
 #' 
 #' @export
 summary.Forecasts = function(
@@ -1660,16 +1459,12 @@ summary.Forecasts = function(
     ...
 ) {
   
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Posterior summary of forecasts                  |\n",
-    "**************************************************|\n"
-  )
-  
   N         = dim(object$forecasts)[1]
   H         = dim(object$forecasts)[2]
+  
+  Y         = object$Y
+  var_names = rownames(Y)
+  if ( is.null(var_names) ) var_names = paste("variable", 1:N)
   
   out       = list()
   for (n in 1:N) {
@@ -1682,7 +1477,7 @@ summary.Forecasts = function(
     rownames(out[[n]]) = 1:H
   } # END n loop
   
-  names(out) = paste0("variable", 1:N)
+  names(out) = var_names
   
   return(out)
 } # END summary.Forecasts
@@ -1714,14 +1509,7 @@ summary.Forecasts = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # upload data
-#' data(us_fiscal_lsuw)
-#' 
-#' # specify the model and set seed
 #' specification  = specify_bsvar_msh$new(us_fiscal_lsuw, p = 1, M = 2)
-#' set.seed(123)
-#' 
-#' # estimate the model
 #' posterior      = estimate(specification, 10)
 #' 
 #' # verify heteroskedasticity
@@ -1730,7 +1518,6 @@ summary.Forecasts = function(
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
-#' set.seed(123)
 #' us_fiscal_lsuw |>
 #'   specify_bsvar_msh$new(p = 1, M = 2) |>
 #'   estimate(S = 10) |> 
@@ -1742,15 +1529,6 @@ summary.SDDRvolatility = function(
     object,
     ...
 ) {
-  
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Summary of structural shocks                    |\n",
-    "     homoskedasticity verification                |\n",
-    "**************************************************|\n"
-  )
   
   N         = nrow(object$logSDDR)
   exp_sddr  = exp(object$logSDDR)
@@ -1793,14 +1571,7 @@ summary.SDDRvolatility = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # upload data
-#' data(us_fiscal_lsuw)
-#' 
-#' # specify the model and set seed
 #' specification  = specify_bsvar_sv$new(us_fiscal_lsuw, p = 1)
-#' set.seed(123)
-#' 
-#' # estimate the model
 #' posterior      = estimate(specification, 10)
 #' 
 #' # verify autoregression
@@ -1811,7 +1582,6 @@ summary.SDDRvolatility = function(
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
-#' set.seed(123)
 #' us_fiscal_lsuw |>
 #'   specify_bsvar_sv$new(p = 1) |>
 #'   estimate(S = 10) |> 
@@ -1823,15 +1593,6 @@ summary.SDDRautoregression = function(
     object,
     ...
 ) {
-  
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Summary of hypothesis verification              |\n",
-    "     for autoregressive parameters                |\n",
-    "**************************************************|\n"
-  )
   
   exp_sddr  = exp(object$logSDDR)
   
@@ -1879,14 +1640,7 @@ summary.SDDRautoregression = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # upload data
-#' data(us_fiscal_lsuw)
-#' 
-#' # specify the model and set seed
 #' specification  = specify_bsvar_sv$new(us_fiscal_lsuw)
-#' set.seed(123)
-#' 
-#' # estimate the model
 #' posterior      = estimate(specification, 10)
 #' 
 #' # verify heteroskedasticity
@@ -1895,7 +1649,6 @@ summary.SDDRautoregression = function(
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
-#' set.seed(123)
 #' us_fiscal_lsuw |>
 #'   specify_bsvar_sv$new() |>
 #'   estimate(S = 10) |> 
@@ -1907,16 +1660,6 @@ summary.SDDRidSV = function(
     object,
     ...
 ) {
-  
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Summary of identification verification          |\n",
-    "    H0: omega_n = 0  [homoskedasticity]           |\n",
-    "    H1: omega_n != 0 [heteroskedasticity]         |\n",
-    "**************************************************|\n"
-  )
   
   N         = nrow(object$logSDDR)
   exp_sddr  = exp(object$logSDDR)
@@ -1964,14 +1707,7 @@ summary.SDDRidSV = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # upload data
-#' data(us_fiscal_lsuw)
-#' 
-#' # specify the model and set seed
 #' specification  = specify_bsvar_msh$new(us_fiscal_lsuw, M = 2)
-#' set.seed(123)
-#' 
-#' # estimate the model
 #' posterior      = estimate(specification, 10)
 #' 
 #' # verify heteroskedasticity
@@ -1980,7 +1716,6 @@ summary.SDDRidSV = function(
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
-#' set.seed(123)
 #' us_fiscal_lsuw |>
 #'   specify_bsvar_msh$new(M = 2) |>
 #'   estimate(S = 10) |> 
@@ -1992,16 +1727,6 @@ summary.SDDRidMSH = function(
     object,
     ...
 ) {
-  
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Summary of identification verification          |\n",
-    "  H0: s^2_nm  = 1 for all m  [homoskedasticity]   |\n",
-    "  H1: s^2_nm != 1 for some m [heteroskedasticity] |\n",
-    "**************************************************|\n"
-  )
   
   N         = nrow(object$logSDDR)
   exp_sddr  = exp(object$logSDDR)
@@ -2045,14 +1770,7 @@ summary.SDDRidMSH = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # upload data
-#' data(us_fiscal_lsuw)
-#' 
-#' # specify the model and set seed
 #' specification  = specify_bsvar_mix$new(us_fiscal_lsuw, M = 2)
-#' set.seed(123)
-#' 
-#' # estimate the model
 #' posterior      = estimate(specification, 10)
 #' 
 #' # verify heteroskedasticity
@@ -2061,7 +1779,6 @@ summary.SDDRidMSH = function(
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
-#' set.seed(123)
 #' us_fiscal_lsuw |>
 #'   specify_bsvar_mix$new(M = 2) |>
 #'   estimate(S = 10) |> 
@@ -2073,16 +1790,6 @@ summary.SDDRidMIX = function(
     object,
     ...
 ) {
-  
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Summary of identification verification          |\n",
-    "  H0: s^2_nm  = 1 for all m  [normal]             |\n",
-    "  H1: s^2_nm != 1 for some m [non-normal]         |\n",
-    "**************************************************|\n"
-  )
   
   N         = nrow(object$logSDDR)
   exp_sddr  = exp(object$logSDDR)
@@ -2126,14 +1833,7 @@ summary.SDDRidMIX = function(
 #' @author Tomasz Woźniak \email{wozniak.tom@pm.me}
 #' 
 #' @examples
-#' # upload data
-#' data(us_fiscal_lsuw)
-#' 
-#' # specify the model and set seed
 #' specification  = specify_bsvar_t$new(us_fiscal_lsuw)
-#' set.seed(123)
-#' 
-#' # estimate the model
 #' posterior      = estimate(specification, 10)
 #' 
 #' # verify heteroskedasticity
@@ -2142,7 +1842,6 @@ summary.SDDRidMIX = function(
 #' 
 #' # workflow with the pipe |>
 #' ############################################################
-#' set.seed(123)
 #' us_fiscal_lsuw |>
 #'   specify_bsvar_t$new() |>
 #'   estimate(S = 10) |> 
@@ -2154,16 +1853,6 @@ summary.SDDRidT = function(
     object,
     ...
 ) {
-  
-  cat(
-    " **************************************************|\n",
-    "bsvars: Bayesian Structural Vector Autoregressions|\n",
-    "**************************************************|\n",
-    "  Summary of identification verification          |\n",
-    "  H0: df = Inf    [normal shocks]                 |\n",
-    "  H1: df != Inf   [Student-t shocks]              |\n",
-    "**************************************************|\n"
-  )
   
   exp_sddr  = object$SDDR
   N         = length(exp_sddr)

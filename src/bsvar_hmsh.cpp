@@ -63,7 +63,7 @@ Rcpp::List bsvar_hmsh_cpp (
   cube  aux_PR_TR   = as<cube>(starting_values["PR_TR"]);     // MxMxN
   mat   aux_pi_0    = as<mat>(starting_values["pi_0"]);       // MxN
   NumericVector xi_start = starting_values["xi"];           // Keep coerced state storage alive.
-  cube  aux_xi      = as<cube>(xi_start);                    // MxTxN
+  cube  aux_xi      = as<cube>(xi_start);                    // 1xTxN
   mat   aux_hyper   = as<mat>(starting_values["hyper"]);
   mat   aux_lambda  = as<mat>(starting_values["lambda"]);
   mat   aux_lambda_sqrt(N, T, fill::ones);
@@ -80,7 +80,7 @@ Rcpp::List bsvar_hmsh_cpp (
   cube  posterior_sigma2(N, M, SS);
   field<cube> posterior_PR_TR(SS);                // (S)(M, M, N) 
   cube  posterior_pi_0(M, N, SS);
-  field<cube> posterior_xi(SS);                   // (S)(M, T, N)
+  field<cube> posterior_xi(SS);                   // (S)(1, T, N)
   cube  posterior_hyper(2 * N + 1, 2, SS);
   cube  posterior_sigma(N, T, SS);
   cube  posterior_lambda(N, T, SS);
@@ -89,15 +89,20 @@ Rcpp::List bsvar_hmsh_cpp (
   int   ss = 0;
   for (int t=0; t<T; t++) {
     for (int n=0; n<N; n++) {
-      aux_sigma(n,t)  = sqrt( aux_sigma2(n, aux_xi.slice(n).col(t).index_max()) );
+      aux_sigma(n,t)  = sqrt( aux_sigma2(n, aux_xi(0,t,n)) );
     }
   }
   
   aux_hetero = aux_sigma % aux_lambda_sqrt;
   
-  // the initial value for the adaptive_scale is set to the negative inverse of 
-  // Hessian for the posterior log_kenel for df evaluated at df = 30
-  double  adaptive_scale_init = abs(pow(0.25 * T * R::psigamma(15, 1) - T * 29 * pow(28, -2) - 2 * pow(29, -2), -1));
+  // the initial proposal variance is the inverse negative Hessian of the
+  // posterior log-kernel for df evaluated at df = 30
+  const double df_reference = 30;
+  const double negative_hessian =
+    0.25 * T * R::psigamma(0.5 * df_reference, 1) -
+    0.5 * T * (df_reference - 4) * std::pow(df_reference - 2, -2) -
+    2 * std::pow(df_reference - 1, -2);
+  double  adaptive_scale_init = 1 / std::sqrt(negative_hessian);
   vec     adaptive_scale(N, fill::value(adaptive_scale_init));
   
   for (int s=0; s<S; s++) {
@@ -123,8 +128,8 @@ Rcpp::List bsvar_hmsh_cpp (
       } catch (std::runtime_error &e) {}
     }
     
-      
     // sample aux_xi
+    U                 = aux_B * (Y - aux_A * X) / aux_lambda_sqrt;
     try {
       aux_xi            = sample_Markov_process_hmsh(aux_xi, U, aux_sigma2, aux_PR_TR, aux_pi_0, finiteM);
     } catch (std::runtime_error &e) {}
@@ -146,7 +151,7 @@ Rcpp::List bsvar_hmsh_cpp (
     
     for (int t=0; t<T; t++) {
       for (int n=0; n<N; n++) {
-        aux_sigma(n,t)  = sqrt( aux_sigma2(n, aux_xi.slice(n).col(t).index_max()) );
+        aux_sigma(n,t)  = sqrt( aux_sigma2(n, aux_xi(0,t,n)) );
       }
     }
     aux_hetero      = aux_sigma % aux_lambda_sqrt;
@@ -209,4 +214,3 @@ Rcpp::List bsvar_hmsh_cpp (
     )
   );
 } // END bsvar_msh
-

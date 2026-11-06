@@ -38,8 +38,8 @@ specify_starting_values_bsvar_hmsh = R6::R6Class(
     #' probability matrix of the Markov process. Its elements sum to 1 over the rows.
     PR_TR         = array(),
     
-    #' @field xi an \code{MxTxN} array of starting values for the Markov process 
-    #' indicator. Its columns are a chosen column of an identity matrix of order \code{M}.
+    #' @field xi a \code{1xTxN} array of starting values for the Markov process
+    #' indicator with integer values from \code{0} to \code{M-1}.
     xi            = array(),
     
     #' @field pi_0 an \code{MxN} matrix of starting values for state probability at 
@@ -60,7 +60,7 @@ specify_starting_values_bsvar_hmsh = R6::R6Class(
     #' the autoregressive matrix \eqn{A} to be estimated and value \code{FALSE} for exclusion restrictions 
     #' to be set to zero.
     #' @param B a logical \code{NxN} matrix containing value \code{TRUE} for the elements of 
-    #' the staructural matrix \eqn{B} to be estimated and value \code{FALSE} for exclusion restrictions 
+    #' the structural matrix \eqn{B} to be estimated and value \code{FALSE} for exclusion restrictions 
     #' to be set to zero.
     #' @param N a positive integer - the number of dependent variables in the model.
     #' @param p a positive integer - the autoregressive lag order of the SVAR model.
@@ -79,19 +79,15 @@ specify_starting_values_bsvar_hmsh = R6::R6Class(
       stopifnot("Argument d must be a non-negative integer number." = d >= 0 & d %% 1 == 0)
       stopifnot("Argument finiteM must be a logical value." = is.logical(finiteM) & length(finiteM) == 1)
       
-      if (!finiteM) {
-        M = 20
-      }
-      
       super$initialize(A, B, N, T, p, d)
       
       self$sigma2         = matrix(1, N, M)
       self$pi_0           = matrix(1/M, M, N)
       self$PR_TR          = array(NA, c(M, M, N))
-      self$xi             = array(NA, c(M, T, N))
+      self$xi             = array(NA, c(1, T, N))
       for (n in 1:N) {
         self$PR_TR[,,n]   = diag(M)
-        self$xi[,,n]      = diag(M)[,sample(1:M, T, replace = TRUE)]
+        self$xi[,,n]      = sample(0:(M-1), T, replace = TRUE)
       }
     }, # END initialize
     
@@ -216,9 +212,9 @@ specify_bsvar_hmsh = R6::R6Class(
     #' of structural shocks. Value \code{"norm"} sets it to the normal distribution, 
     #' while value \code{"t"} sets the Student-t distribution.
     #' @param exogenous a \code{(T+p)xd} matrix of exogenous variables. 
-    #' @param stationary an \code{N} logical vector - its element set to \code{FALSE} 
-    #' sets the prior mean for the autoregressive parameters of the \code{N}th equation 
-    #' to the white noise process, otherwise to random walk.
+    #' @param stationary an \code{N} logical vector - its element set to \code{FALSE} sets 
+    #' the prior mean for the autoregressive parameters of the \code{N}th equation to the random walk process, 
+    #' otherwise to white noise.
     #' @param finiteM a logical value - if true a stationary Markov switching model 
     #' is estimated. Otherwise, a sparse Markov switching model is estimated in which 
     #' \code{M=20} and the number of visited states is estimated.
@@ -250,9 +246,9 @@ specify_bsvar_hmsh = R6::R6Class(
       K             = N * p + 1 + d
       
       if (!finiteM) {
-        if ( M < 20 ) {
-          M = 20L
-          message("In the sparse Markov switching model the value of M is overwritten and set to 20.")
+        if ( M < 10 ) {
+          M = 10L
+          message("In the sparse Markov switching model the value of M is overwritten and set to 10.")
         }
       }
       self$finiteM  = finiteM

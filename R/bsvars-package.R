@@ -21,30 +21,32 @@
 #
 #' @title Bayesian Estimation of Structural Vector Autoregressive Models
 #'
-#' @description Provides fast and efficient procedures for Bayesian analysis of 
-#' Structural Vector Autoregressions. This package estimates a wide range of 
-#' models, including homo-, heteroskedastic and non-normal specifications. 
-#' Structural models can be identified by adjustable exclusion restrictions, 
-#' time-varying volatility, or non-normality, and include exclusion restrictions 
-#' on autoregressive parameters.
-#' They all include a flexible three-level equation-specific local-global 
-#' hierarchical prior distribution for the estimated level of shrinkage for 
-#' autoregressive and structural parameters. Additionally, the package facilitates 
-#' predictive and structural analyses such as impulse responses, forecast error 
-#' variance and historical decompositions, forecasting, verification of 
-#' heteroskedasticity and hypotheses on autoregressive parameters, and analyses 
-#' of structural shocks, volatilities, and fitted values. Beautiful plots, 
-#' informative summary functions, and extensive documentation including the 
-#' vignette by Woźniak (2024) <doi:10.48550/arXiv.2410.15090> complement all this. 
-#' The implemented techniques align closely with those presented in 
+#' @description 
+#' Provides fast and efficient procedures for Bayesian analysis of Structural 
+#' Vector Autoregressions. This package estimates a wide range of models, 
+#' including homo-, heteroskedastic, and non-normal specifications. Structural 
+#' models can be identified by adjustable exclusion restrictions, time-varying 
+#' volatility, or non-normality, and include exclusion restrictions on 
+#' autoregressive parameters. They all include a flexible three-level 
+#' equation-specific local-global hierarchical prior distribution for the 
+#' estimated level of shrinkage for autoregressive and structural parameters. 
+#' Additionally, the package facilitates predictive and structural analyses such 
+#' as impulse responses, forecast error variance and historical decompositions, 
+#' forecasting, verification of heteroskedasticity, non-normality, and hypotheses 
+#' on autoregressive parameters, as well as analyses of structural shocks, 
+#' volatilities, and fitted values. Beautiful plots, informative summary 
+#' functions, and extensive documentation including the vignette by 
+#' Woźniak (2025) <doi:10.48550/arXiv.2410.15090> complement all this. The 
+#' implemented techniques align closely with those presented in 
 #' Lütkepohl, Shang, Uzeda, & Woźniak (2025) <doi:10.1016/j.jeconom.2025.106107>, 
-#' Lütkepohl & Woźniak (2020) <doi:10.1016/j.jedc.2020.103862>, 
-#' Song & Woźniak (2021) <doi:10.1093/acrefore/9780190625979.013.174>, and 
-#' Woźniak & Droumaguet (2015) <doi:10.13140/RG.2.2.19492.55687>. The 'bsvars' 
-#' package is aligned regarding objects, workflows, and code structure with the 
-#' R package 'bsvarSIGNs' by Wang & Woźniak (2024) 
-#' <doi:10.32614/CRAN.package.bsvarSIGNs>, and they constitute an integrated 
-#' toolset.
+#' Lütkepohl & Woźniak (2020) <doi:10.1016/j.jedc.2020.103862>, and 
+#' Song & Woźniak (2021) <doi:10.1093/acrefore/9780190625979.013.174> and they 
+#' embed many popular models proposed by other authors. The 'bsvars' package is 
+#' aligned regarding objects, workflows, and code structure with the R packages 
+#' 'bsvarSIGNs' by Wang & Woźniak (2025) <doi:10.32614/CRAN.package.bsvarSIGNs>, 
+#' 'bvars' by Liu, Ramirez Hassan, Woźniak (2026) <doi:10.32614/CRAN.package.bvars>, 
+#' and 'bpvars' by Woźniak (2026) <doi:10.32614/CRAN.package.bpvars>, and they 
+#' constitute an integrated toolset.
 #' 
 #' @details 
 #' 
@@ -135,9 +137,12 @@
 #' Estimation of Stochastic Volatility Models. \emph{Computational Statistics & Data Analysis}, \bold{76}, 408--423, 
 #' \doi{10.1016/j.csda.2013.01.002}.
 #' 
+#'  Liu, Ramirez Hassan, Woźniak (2026) bvars: Bayesian Forecasting with Large 
+#'  Vector Autoregressions. R package version 1.0, \doi{10.32614/CRAN.package.bvars}.
+#' 
 #' Lütkepohl, H., Shang, F., Uzeda, L., and Woźniak, T. (2025) 
 #' Partial identification of structural vector autoregressions with non-centred stochastic volatility. 
-#' \emph{Journal of Econometrics}, 1--18, \doi{10.1016/j.jeconom.2025.106107}.
+#' \emph{Journal of Econometrics} \bold{256}, 106107, \doi{10.1016/j.jeconom.2025.106107}.
 #' 
 #' Lütkepohl, H., and Woźniak, T., (2020) Bayesian Inference for Structural Vector Autoregressions Identified by Markov-Switching Heteroskedasticity. 
 #' \emph{Journal of Economic Dynamics and Control} \bold{113}, 103862, \doi{10.1016/j.jedc.2020.103862}.
@@ -148,6 +153,12 @@
 #' Waggoner, D.F., and Zha, T., (2003) A Gibbs sampler for structural vector autoregressions. 
 #' \emph{Journal of Economic Dynamics and Control}, \bold{28}, 349--366, \doi{10.1016/S0165-1889(02)00168-9}.
 #' 
+#' Wang X, Woźniak T (2025). bsvarSIGNs: Bayesian SVARs with Sign, Zero, and 
+#' Narrative Restrictions. R package version 2.0, \doi{10.32614/CRAN.package.bsvarSIGNs}.
+#' 
+#' Woźniak T (2026) bpvars: Forecasting with Bayesian Panel Vector Autoregressions. 
+#' R package version 2.0, \doi{10.32614/CRAN.package.bpvars}.
+#' 
 #' @keywords package models ts
 #' 
 #' @examples
@@ -156,7 +167,7 @@
 #'           exogenous = us_fiscal_ex
 #'         )
 #' burn  = estimate(spec, 5)             # run the burn-in
-#' post  = estimate(burn, 10)            # estimate the model
+#' post  = estimate(burn, 5)             # estimate the model
 #' irf   = compute_impulse_responses(    # compute impulse responses
 #'           post, 
 #'           horizon = 2
@@ -170,7 +181,7 @@
 #' us_fiscal_lsuw |>
 #'   specify_bsvar_sv$new(exogenous = us_fiscal_ex) |>
 #'   estimate(S = 5) |> 
-#'   estimate(S = 10) |> 
+#'   estimate(S = 5) |> 
 #'   compute_variance_decompositions(horizon = 4) -> fevds
 #' 
 #' # conditional forecasting using a model with exogenous variables
@@ -178,7 +189,7 @@
 #' us_fiscal_lsuw |>
 #'   specify_bsvar_sv$new(exogenous = us_fiscal_ex) |>
 #'   estimate(S = 5) |> 
-#'   estimate(S = 10) -> post
+#'   estimate(S = 5) -> post
 #'   
 #'  post |> forecast(
 #'     horizon = 8,
@@ -196,7 +207,7 @@
 #' us_fiscal_lsuw |>
 #'   specify_bsvar_sv$new(p = 2, A = A) |>
 #'   estimate(S = 5) |> 
-#'   estimate(S = 10) -> post
+#'   estimate(S = 5) -> post
 #' post |> summary()
 #' 
 "_PACKAGE"

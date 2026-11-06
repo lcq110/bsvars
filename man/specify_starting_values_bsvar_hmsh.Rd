@@ -60,8 +60,8 @@ value \code{M} over the rows.}
     \item{\code{PR_TR}}{an \code{MxMxN} array of starting values for the transition 
 probability matrix of the Markov process. Its elements sum to 1 over the rows.}
 
-    \item{\code{xi}}{an \code{MxTxN} array of starting values for the Markov process 
-indicator. Its columns are a chosen column of an identity matrix of order \code{M}.}
+    \item{\code{xi}}{a \code{1xTxN} array of starting values for the Markov process
+indicator with integer values from \code{0} to \code{M-1}.}
 
     \item{\code{pi_0}}{an \code{MxN} matrix of starting values for state probability at 
 time \code{t=0}. Its elements sum to 1 in columns.}
@@ -100,7 +100,7 @@ conditional distribution of structural shocks.}
 the autoregressive matrix \eqn{A} to be estimated and value \code{FALSE} for exclusion restrictions 
 to be set to zero.}
       \item{\code{B}}{a logical \code{NxN} matrix containing value \code{TRUE} for the elements of 
-the staructural matrix \eqn{B} to be estimated and value \code{FALSE} for exclusion restrictions 
+the structural matrix \eqn{B} to be estimated and value \code{FALSE} for exclusion restrictions 
 to be set to zero.}
       \item{\code{N}}{a positive integer - the number of dependent variables in the model.}
       \item{\code{p}}{a positive integer - the autoregressive lag order of the SVAR model.}
