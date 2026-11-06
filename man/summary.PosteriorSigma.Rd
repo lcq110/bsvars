@@ -5,24 +5,29 @@
 \title{Provides posterior summary of structural shocks' conditional standard 
 deviations}
 \usage{
-\method{summary}{PosteriorSigma}(object, ...)
+\method{summary}{PosteriorSigma}(object, probability = 0.9, interval = c("equal-tailed", "hpd"), ...)
 }
 \arguments{
 \item{object}{an object of class PosteriorSigma obtained using the
 \code{compute_conditional_sd()} function containing posterior draws of 
 conditional standard deviations of structural shocks.}
 
+\item{probability}{Probability content of the posterior interval.}
+
+\item{interval}{Interval type: \code{"equal-tailed"} (the default) or
+\code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.}
+
 \item{...}{additional arguments affecting the summary produced.}
 }
 \value{
 A list reporting the posterior mean, standard deviations, as well as 
-5 and 95 percentiles of the structural shocks' conditional standard deviations
+(by default) 5 and 95 percentiles of the structural shocks' conditional standard deviations
 for each of the shocks and periods.
 }
 \description{
 Provides posterior summary of structural shocks' conditional 
 standard deviations including their mean, standard deviations, as well as 
-5 and 95 percentiles.
+(by default) 5 and 95 percentiles.
 }
 \examples{
 specification  = specify_bsvar_sv$new(us_fiscal_lsuw)

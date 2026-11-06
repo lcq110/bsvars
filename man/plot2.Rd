@@ -14,17 +14,69 @@
 \usage{
 plot2(x, ...)
 
-\method{plot2}{PosteriorSigma}(x, probability = 0.9, shock_names, col = "#ff69b4", main, xlab, ...)
+\method{plot2}{PosteriorSigma}(
+  x,
+  probability = 0.9,
+  shock_names,
+  col = "#ff69b4",
+  main,
+  xlab,
+  ...,
+  interval = c("equal-tailed", "hpd")
+)
 
-\method{plot2}{PosteriorFitted}(x, probability = 0.9, col = "#ff69b4", main, xlab, ...)
+\method{plot2}{PosteriorFitted}(
+  x,
+  probability = 0.9,
+  col = "#ff69b4",
+  main,
+  xlab,
+  ...,
+  interval = c("equal-tailed", "hpd")
+)
 
-\method{plot2}{PosteriorIR}(x, probability = 0.9, shock_names, col = "#ff69b4", main, xlab, ...)
+\method{plot2}{PosteriorIR}(
+  x,
+  probability = 0.9,
+  shock_names,
+  col = "#ff69b4",
+  main,
+  xlab,
+  ...,
+  interval = c("equal-tailed", "hpd")
+)
 
-\method{plot2}{PosteriorRegimePr}(x, probability = 0.9, col = "#ff69b4", main, xlab, ...)
+\method{plot2}{PosteriorRegimePr}(
+  x,
+  probability = 0.9,
+  col = "#ff69b4",
+  main,
+  xlab,
+  ...,
+  interval = c("equal-tailed", "hpd")
+)
 
-\method{plot2}{PosteriorShocks}(x, probability = 0.9, shock_names, col = "#ff69b4", main, xlab, ...)
+\method{plot2}{PosteriorShocks}(
+  x,
+  probability = 0.9,
+  shock_names,
+  col = "#ff69b4",
+  main,
+  xlab,
+  ...,
+  interval = c("equal-tailed", "hpd")
+)
 
-\method{plot2}{Forecasts}(x, probability = 0.9, data_in_plot = 1, col = "#ff69b4", main, xlab, ...)
+\method{plot2}{Forecasts}(
+  x,
+  probability = 0.9,
+  data_in_plot = 1,
+  col = "#ff69b4",
+  main,
+  xlab,
+  ...,
+  interval = c("equal-tailed", "hpd")
+)
 
 \method{plot2}{PosteriorFEVD}(x, shock_names, cols, main, xlab, ...)
 
@@ -37,7 +89,7 @@ PosteriorRegimePr, PosteriorFEVD, PosteriorHD, or Forecasts object.}
 \item{...}{Passed to \code{ggplot2::geom_line()}, or to
 \code{ggplot2::geom_area()} for FEVD and HD.}
 
-\item{probability}{Probability of the equal-tailed interval.}
+\item{probability}{Probability of the plotted interval.}
 
 \item{shock_names}{Names of the structural shocks.}
 
@@ -46,6 +98,9 @@ PosteriorRegimePr, PosteriorFEVD, PosteriorHD, or Forecasts object.}
 \item{main}{Plot title.}
 
 \item{xlab}{Horizontal axis label.}
+
+\item{interval}{Interval type: \code{"equal-tailed"} (the default) or
+\code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.}
 
 \item{data_in_plot}{Fraction of historical observations shown with forecasts.}
 
@@ -59,7 +114,7 @@ Draw an editable ggplot2 plot from posterior draws or forecasts. The existing
 base \code{plot()} methods are unchanged and do not call \code{plot2()}.
 }
 \details{
-Median lines and equal-tailed intervals summarize the input draws;
+Median lines and posterior intervals summarize the input draws;
   plots use a white classic theme and white facet-label backgrounds by default.
   FEVD and HD use posterior means. Each IR panel has its own y scale.
   HD contributions are connected linearly as areas stacked above and below zero.

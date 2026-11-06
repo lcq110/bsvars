@@ -4,22 +4,27 @@
 \alias{summary.Forecasts}
 \title{Provides posterior summary of Forecasts}
 \usage{
-\method{summary}{Forecasts}(object, ...)
+\method{summary}{Forecasts}(object, probability = 0.9, interval = c("equal-tailed", "hpd"), ...)
 }
 \arguments{
 \item{object}{an object of class Forecasts obtained using the
 \code{forecast()} function containing draws the predictive density.}
 
+\item{probability}{Probability content of the posterior interval.}
+
+\item{interval}{Interval type: \code{"equal-tailed"} (the default) or
+\code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.}
+
 \item{...}{additional arguments affecting the summary produced.}
 }
 \value{
 A list reporting the posterior mean, standard deviations, as well as 
-5 and 95 percentiles of the forecasts for each of the variables and forecast 
+(by default) 5 and 95 percentiles of the forecasts for each of the variables and forecast
 horizons.
 }
 \description{
 Provides posterior summary of the forecasts including their 
-mean, standard deviations, as well as 5 and 95 percentiles.
+mean, standard deviations, as well as (by default) 5 and 95 percentiles.
 }
 \examples{
 specification  = specify_bsvar$new(us_fiscal_lsuw)

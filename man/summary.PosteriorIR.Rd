@@ -4,24 +4,29 @@
 \alias{summary.PosteriorIR}
 \title{Provides posterior summary of impulse responses}
 \usage{
-\method{summary}{PosteriorIR}(object, ...)
+\method{summary}{PosteriorIR}(object, probability = 0.9, interval = c("equal-tailed", "hpd"), ...)
 }
 \arguments{
 \item{object}{an object of class PosteriorIR obtained using the
 \code{compute_impulse_responses()} function containing draws from the posterior
 distribution of the impulse responses.}
 
+\item{probability}{Probability content of the posterior interval.}
+
+\item{interval}{Interval type: \code{"equal-tailed"} (the default) or
+\code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.}
+
 \item{...}{additional arguments affecting the summary produced.}
 }
 \value{
 A list reporting the posterior mean, standard deviations, as well as 
-5 and 95 percentiles of the impulse responses of each variable to each of the 
+(by default) 5 and 95 percentiles of the impulse responses of each variable to each of the
 shocks at all horizons.
 }
 \description{
 Provides posterior summary of the impulse responses of each 
 variable to each of the shocks at all horizons. Includes their posterior 
-means, standard deviations, as well as 5 and 95 percentiles.
+means, standard deviations, as well as (by default) 5 and 95 percentiles.
 }
 \examples{
 specification  = specify_bsvar$new(us_fiscal_lsuw)
