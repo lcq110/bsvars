@@ -73,7 +73,7 @@ compute_variance_decompositions.PosteriorBSVAR <- function(posterior, horizon) {
   normal          = posterior$last_draw$get_normal()
   sigma2          = array(1, c(N, horizon, S))
   
-  posterior_irf   = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, horizon, p, TRUE)
+  posterior_irf   = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, horizon, p, FALSE)
   if (!normal) {
     forecast_lambda = .Call(`_bsvars_forecast_lambda_t`, posterior_df, horizon) # END .Call
     sigma2          = sigma2 * forecast_lambda
@@ -137,7 +137,7 @@ compute_variance_decompositions.PosteriorBSVAREXH <- function(posterior, horizon
   posterior_df    = posterior$posterior$df
   normal          = posterior$last_draw$get_normal()
   
-  posterior_irf   = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, horizon, p, TRUE)
+  posterior_irf   = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, horizon, p, FALSE)
 
   sigma2          = array(NA, c(N, horizon, S))
   for (h in 1:horizon) {
@@ -210,7 +210,7 @@ compute_variance_decompositions.PosteriorBSVARMSH <- function(posterior, horizon
   posterior_df    = posterior$posterior$df
   normal          = posterior$last_draw$get_normal()
   
-  posterior_irf   = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, horizon, p, TRUE)
+  posterior_irf   = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, horizon, p, FALSE)
   sigma2          = .Call(`_bsvars_forecast_sigma2_msh`, posterior_sigma2, posterior_PR_TR, S_T, horizon)
   if (!normal) {
     forecast_lambda = .Call(`_bsvars_forecast_lambda_t`, posterior_df, horizon) # END .Call
@@ -277,15 +277,16 @@ compute_variance_decompositions.PosteriorBSVARHMSH <- function(posterior, horizo
   
   S_T             = array(NA, c(M,N,S))
   for (s in 1:S) {
-    S_T[,,s]      = posterior$posterior$xi_cpp[S,1][[1]][,T,]
+    S_T[,,s]      = posterior$posterior$xi_cpp[s,1][[1]][,T,]
   }
 
   sigma2_T        = posterior$posterior$sigma[,T,]^2
   Y               = posterior$last_draw$data_matrices$Y
   
-  posterior_irf   = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, horizon, p, TRUE)
+  posterior_irf   = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, horizon, p, FALSE)
   sigma2          = .Call(`_bsvars_forecast_sigma2_hmsh`, posterior_sigma2, posterior_PR_TR, S_T, horizon)
   if (!normal) {
+    sigma2_T        = sigma2_T * posterior$posterior$lambda[,T,]
     forecast_lambda = .Call(`_bsvars_forecast_lambda_t`, posterior_df, horizon) # END .Call
     sigma2          = sigma2 * forecast_lambda
   }
@@ -356,7 +357,7 @@ compute_variance_decompositions.PosteriorBSVARMIX <- function(posterior, horizon
   posterior_df    = posterior$posterior$df
   normal          = posterior$last_draw$get_normal()
   
-  posterior_irf   = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, horizon, p, TRUE)
+  posterior_irf   = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, horizon, p, FALSE)
   sigma2          = .Call(`_bsvars_forecast_sigma2_msh`, posterior_sigma2, posterior_PR_TR, S_T, horizon)
   if (!normal) {
     forecast_lambda = .Call(`_bsvars_forecast_lambda_t`, posterior_df, horizon) # END .Call
@@ -422,7 +423,7 @@ compute_variance_decompositions.PosteriorBSVARSV <- function(posterior, horizon)
   posterior_df    = posterior$posterior$df
   normal          = posterior$last_draw$get_normal()
   
-  posterior_irf   = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, horizon, p, TRUE)
+  posterior_irf   = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, horizon, p, FALSE)
   sigma2          = .Call(`_bsvars_forecast_sigma2_sv`, posterior_h_T, posterior_rho, posterior_omega, horizon, centred_sv)
   if (!normal) {
     forecast_lambda = .Call(`_bsvars_forecast_lambda_t`, posterior_df, horizon) # END .Call
@@ -483,7 +484,7 @@ compute_variance_decompositions.PosteriorBSVART <- function(posterior, horizon) 
   sigma2_T        = matrix(NA, N, S)
   Y               = posterior$last_draw$data_matrices$Y
 
-  posterior_irf   = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, horizon, p, TRUE)
+  posterior_irf   = .Call(`_bsvars_bsvars_ir`, posterior_B, posterior_A, horizon, p, FALSE)
   sigma2          = .Call(`_bsvars_forecast_lambda_t`, posterior_df, horizon) # (horizon, S)
   sigma2_T        = matrix(1, N, S)
   qqq             = .Call(`_bsvars_bsvars_fevd_heterosk`, posterior_irf, sigma2, sigma2_T)
