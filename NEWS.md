@@ -8,7 +8,7 @@ Added `plot2()` methods that draw with ggplot2 and invisibly return editable plo
 
 1. Corrected stochastic-volatility auxiliary kernels as proposed by [Fei Shang](https://github.com/lcq110) in PR [#160](https://github.com/bsvars/bsvars/pull/160)
 
-2. New function `compute_cumulative_impulse_responses()` computes posterior draws of cumulative impulse responses as `PosteriorIR` objects that work with `summary()`, `plot()`, and `plot2()`; both plot methods use the default title "Cumulative Impulse Responses"
+2. New function `compute_cumulative_impulse_responses()` computes posterior draws of cumulative impulse responses as `PosteriorIR` objects that work with `summary()`, `plot()`, and `plot2()`.
 
 # bsvars 4.0
 
