@@ -4,7 +4,7 @@
 \alias{summary.PosteriorBSVARMSH}
 \title{Provides posterior summary of heteroskedastic Structural VAR estimation}
 \usage{
-\method{summary}{PosteriorBSVARMSH}(object, ...)
+\method{summary}{PosteriorBSVARMSH}(object, probability = 0.9, interval = c("equal-tailed", "hpd"), ...)
 }
 \arguments{
 \item{object}{an object of class PosteriorBSVARMSH obtained using the
@@ -12,15 +12,20 @@
 model specification set by function \code{specify_bsvar_msh$new()} containing 
 draws from the  posterior distribution of the parameters.}
 
+\item{probability}{Probability content of the posterior interval.}
+
+\item{interval}{Interval type: \code{"equal-tailed"} (the default) or
+\code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.}
+
 \item{...}{additional arguments affecting the summary produced.}
 }
 \value{
-A list reporting the posterior mean, standard deviations, as well as 5 and 95 
+A list reporting the posterior mean, standard deviations, as well as (by default) 5 and 95
 percentiles of the parameters: the structural matrix \eqn{B}, autoregressive 
 parameters \eqn{A}, and hyper-parameters.
 }
 \description{
-Provides posterior mean, standard deviations, as well as 5 and 95 
+Provides posterior mean, standard deviations, as well as (by default) 5 and 95
 percentiles of the parameters: the structural matrix \eqn{B}, autoregressive 
 parameters \eqn{A}, and hyper parameters.
 }

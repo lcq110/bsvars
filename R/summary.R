@@ -1,7 +1,7 @@
 
 #' @title Provides posterior summary of homoskedastic Structural VAR estimation
 #'
-#' @description Provides posterior mean, standard deviations, as well as 5 and 95 
+#' @description Provides posterior mean, standard deviations, as well as (by default) 5 and 95
 #' percentiles of the parameters: the structural matrix \eqn{B}, autoregressive 
 #' parameters \eqn{A}, and hyper parameters.
 #' 
@@ -9,9 +9,12 @@
 #' \code{estimate()} function applied to homoskedastic Bayesian Structural VAR
 #' model specification set by function \code{specify_bsvar$new()} containing 
 #' draws from the  posterior distribution of the parameters. 
+#' @param probability Probability content of the posterior interval.
+#' @param interval Interval type: \code{"equal-tailed"} (the default) or
+#'   \code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.
 #' @param ... additional arguments affecting the summary produced.
 #' 
-#' @return A list reporting the posterior mean, standard deviations, as well as 5 and 95 
+#' @return A list reporting the posterior mean, standard deviations, as well as (by default) 5 and 95
 #' percentiles of the parameters: the structural matrix \eqn{B}, autoregressive 
 #' parameters \eqn{A}, and hyper-parameters.
 #' 
@@ -40,8 +43,11 @@
 #' @export
 summary.PosteriorBSVAR = function(
     object,
+    probability = 0.9,
+    interval = c("equal-tailed", "hpd"),
     ...
 ) {
+  interval = match.arg(interval)
   
   N         = dim(object$posterior$A)[1]
   p         = object$last_draw$p
@@ -62,21 +68,19 @@ summary.PosteriorBSVAR = function(
       cbind(
         apply(object$posterior$B[n,,], 1, mean),
         apply(object$posterior$B[n,,], 1, sd),
-        apply(object$posterior$B[n,,], 1, quantile, probs = 0.05),
-        apply(object$posterior$B[n,,], 1, quantile, probs = 0.95)
+        .interval_bounds(object$posterior$B[n,,], probability, interval)
       )[which_par,],
       ncol = 4
     )
-    colnames(out$B[[n]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$B[[n]]) = c("mean", "sd", .interval_names(probability, interval))
     rownames(out$B[[n]]) = paste0("B[", n, ",", which_par, "]")  
     
     out$A[[n]] = cbind(
       apply(object$posterior$A[n,,], 1, mean),
       apply(object$posterior$A[n,,], 1, sd),
-      apply(object$posterior$A[n,,], 1, quantile, probs = 0.05),
-      apply(object$posterior$A[n,,], 1, quantile, probs = 0.95)
+      .interval_bounds(object$posterior$A[n,,], probability, interval)
     )
-    colnames(out$A[[n]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$A[[n]]) = c("mean", "sd", .interval_names(probability, interval))
     
     Anames  = c(
       paste0(
@@ -100,11 +104,10 @@ summary.PosteriorBSVAR = function(
     out$hyper[[i]] = cbind(
       apply(object$posterior$hyper[,i,], 1, mean),
       apply(object$posterior$hyper[,i,], 1, sd),
-      apply(object$posterior$hyper[,i,], 1, quantile, probs = 0.05),
-      apply(object$posterior$hyper[,i,], 1, quantile, probs = 0.95)
+      .interval_bounds(object$posterior$hyper[,i,], probability, interval)
     )
   
-    colnames(out$hyper[[i]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$hyper[[i]]) = c("mean", "sd", .interval_names(probability, interval))
     rownames(out$hyper[[i]]) = c(
       paste0(
         rep(param[i], N),
@@ -128,7 +131,7 @@ summary.PosteriorBSVAR = function(
 
 #' @title Provides posterior summary of heteroskedastic Structural VAR estimation
 #'
-#' @description Provides posterior mean, standard deviations, as well as 5 and 95 
+#' @description Provides posterior mean, standard deviations, as well as (by default) 5 and 95
 #' percentiles of the parameters: the structural matrix \eqn{B}, autoregressive 
 #' parameters \eqn{A}, and hyper parameters.
 #' 
@@ -136,9 +139,12 @@ summary.PosteriorBSVAR = function(
 #' \code{estimate()} function applied to heteroskedastic Bayesian Structural VAR
 #' model specification set by function \code{specify_bsvar_sv$new()} containing 
 #' draws from the  posterior distribution of the parameters. 
+#' @param probability Probability content of the posterior interval.
+#' @param interval Interval type: \code{"equal-tailed"} (the default) or
+#'   \code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.
 #' @param ... additional arguments affecting the summary produced.
 #' 
-#' @return A list reporting the posterior mean, standard deviations, as well as 5 and 95 
+#' @return A list reporting the posterior mean, standard deviations, as well as (by default) 5 and 95
 #' percentiles of the parameters: the structural matrix \eqn{B}, autoregressive 
 #' parameters \eqn{A}, and hyper-parameters.
 #' 
@@ -167,8 +173,11 @@ summary.PosteriorBSVAR = function(
 #' @export
 summary.PosteriorBSVARSV = function(
     object,
+    probability = 0.9,
+    interval = c("equal-tailed", "hpd"),
     ...
 ) {
+  interval = match.arg(interval)
   
   N         = dim(object$posterior$A)[1]
   p         = object$last_draw$p
@@ -189,21 +198,19 @@ summary.PosteriorBSVARSV = function(
       cbind(
         apply(object$posterior$B[n,,], 1, mean),
         apply(object$posterior$B[n,,], 1, sd),
-        apply(object$posterior$B[n,,], 1, quantile, probs = 0.05),
-        apply(object$posterior$B[n,,], 1, quantile, probs = 0.95)
+        .interval_bounds(object$posterior$B[n,,], probability, interval)
       )[which_par,],
       ncol = 4
     )
-    colnames(out$B[[n]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$B[[n]]) = c("mean", "sd", .interval_names(probability, interval))
     rownames(out$B[[n]]) = paste0("B[", n, ",", which_par, "]")  
     
     out$A[[n]] = cbind(
       apply(object$posterior$A[n,,], 1, mean),
       apply(object$posterior$A[n,,], 1, sd),
-      apply(object$posterior$A[n,,], 1, quantile, probs = 0.05),
-      apply(object$posterior$A[n,,], 1, quantile, probs = 0.95)
+      .interval_bounds(object$posterior$A[n,,], probability, interval)
     )
-    colnames(out$A[[n]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$A[[n]]) = c("mean", "sd", .interval_names(probability, interval))
     
     Anames  = c(
       paste0(
@@ -227,11 +234,10 @@ summary.PosteriorBSVARSV = function(
     out$hyper[[i]] = cbind(
       apply(object$posterior$hyper[,i,], 1, mean),
       apply(object$posterior$hyper[,i,], 1, sd),
-      apply(object$posterior$hyper[,i,], 1, quantile, probs = 0.05),
-      apply(object$posterior$hyper[,i,], 1, quantile, probs = 0.95)
+      .interval_bounds(object$posterior$hyper[,i,], probability, interval)
     )
     
-    colnames(out$hyper[[i]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$hyper[[i]]) = c("mean", "sd", .interval_names(probability, interval))
     rownames(out$hyper[[i]]) = c(
       paste0(
         rep(param[i], N),
@@ -257,7 +263,7 @@ summary.PosteriorBSVARSV = function(
 
 #' @title Provides posterior summary of heteroskedastic Structural VAR estimation
 #'
-#' @description Provides posterior mean, standard deviations, as well as 5 and 95 
+#' @description Provides posterior mean, standard deviations, as well as (by default) 5 and 95
 #' percentiles of the parameters: the structural matrix \eqn{B}, autoregressive 
 #' parameters \eqn{A}, and hyper parameters.
 #' 
@@ -265,9 +271,12 @@ summary.PosteriorBSVARSV = function(
 #' \code{estimate()} function applied to heteroskedastic Bayesian Structural VAR
 #' model specification set by function \code{specify_bsvar_exh$new()} containing 
 #' draws from the  posterior distribution of the parameters. 
+#' @param probability Probability content of the posterior interval.
+#' @param interval Interval type: \code{"equal-tailed"} (the default) or
+#'   \code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.
 #' @param ... additional arguments affecting the summary produced.
 #' 
-#' @return A list reporting the posterior mean, standard deviations, as well as 5 and 95 
+#' @return A list reporting the posterior mean, standard deviations, as well as (by default) 5 and 95
 #' percentiles of the parameters: the structural matrix \eqn{B}, autoregressive 
 #' parameters \eqn{A}, and hyper-parameters.
 #' 
@@ -296,8 +305,11 @@ summary.PosteriorBSVARSV = function(
 #' @export
 summary.PosteriorBSVAREXH = function(
     object,
+    probability = 0.9,
+    interval = c("equal-tailed", "hpd"),
     ...
 ) {
+  interval = match.arg(interval)
   
   N         = dim(object$posterior$A)[1]
   p         = object$last_draw$p
@@ -318,21 +330,19 @@ summary.PosteriorBSVAREXH = function(
       cbind(
         apply(object$posterior$B[n,,], 1, mean),
         apply(object$posterior$B[n,,], 1, sd),
-        apply(object$posterior$B[n,,], 1, quantile, probs = 0.05),
-        apply(object$posterior$B[n,,], 1, quantile, probs = 0.95)
+        .interval_bounds(object$posterior$B[n,,], probability, interval)
       )[which_par,],
       ncol = 4
     )
-    colnames(out$B[[n]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$B[[n]]) = c("mean", "sd", .interval_names(probability, interval))
     rownames(out$B[[n]]) = paste0("B[", n, ",", which_par, "]")  
     
     out$A[[n]] = cbind(
       apply(object$posterior$A[n,,], 1, mean),
       apply(object$posterior$A[n,,], 1, sd),
-      apply(object$posterior$A[n,,], 1, quantile, probs = 0.05),
-      apply(object$posterior$A[n,,], 1, quantile, probs = 0.95)
+      .interval_bounds(object$posterior$A[n,,], probability, interval)
     )
-    colnames(out$A[[n]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$A[[n]]) = c("mean", "sd", .interval_names(probability, interval))
     
     Anames  = c(
       paste0(
@@ -356,11 +366,10 @@ summary.PosteriorBSVAREXH = function(
     out$hyper[[i]] = cbind(
       apply(object$posterior$hyper[,i,], 1, mean),
       apply(object$posterior$hyper[,i,], 1, sd),
-      apply(object$posterior$hyper[,i,], 1, quantile, probs = 0.05),
-      apply(object$posterior$hyper[,i,], 1, quantile, probs = 0.95)
+      .interval_bounds(object$posterior$hyper[,i,], probability, interval)
     )
     
-    colnames(out$hyper[[i]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$hyper[[i]]) = c("mean", "sd", .interval_names(probability, interval))
     rownames(out$hyper[[i]]) = c(
       paste0(
         rep(param[i], N),
@@ -385,7 +394,7 @@ summary.PosteriorBSVAREXH = function(
 
 #' @title Provides posterior summary of heteroskedastic Structural VAR estimation
 #'
-#' @description Provides posterior mean, standard deviations, as well as 5 and 95 
+#' @description Provides posterior mean, standard deviations, as well as (by default) 5 and 95
 #' percentiles of the parameters: the structural matrix \eqn{B}, autoregressive 
 #' parameters \eqn{A}, and hyper parameters.
 #' 
@@ -393,9 +402,12 @@ summary.PosteriorBSVAREXH = function(
 #' \code{estimate()} function applied to heteroskedastic Bayesian Structural VAR
 #' model specification set by function \code{specify_bsvar_msh$new()} containing 
 #' draws from the  posterior distribution of the parameters. 
+#' @param probability Probability content of the posterior interval.
+#' @param interval Interval type: \code{"equal-tailed"} (the default) or
+#'   \code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.
 #' @param ... additional arguments affecting the summary produced.
 #' 
-#' @return A list reporting the posterior mean, standard deviations, as well as 5 and 95 
+#' @return A list reporting the posterior mean, standard deviations, as well as (by default) 5 and 95
 #' percentiles of the parameters: the structural matrix \eqn{B}, autoregressive 
 #' parameters \eqn{A}, and hyper-parameters.
 #' 
@@ -424,8 +436,11 @@ summary.PosteriorBSVAREXH = function(
 #' @export
 summary.PosteriorBSVARMSH = function(
     object,
+    probability = 0.9,
+    interval = c("equal-tailed", "hpd"),
     ...
 ) {
+  interval = match.arg(interval)
   
   N         = dim(object$posterior$A)[1]
   p         = object$last_draw$p
@@ -446,21 +461,19 @@ summary.PosteriorBSVARMSH = function(
       cbind(
         apply(object$posterior$B[n,,], 1, mean),
         apply(object$posterior$B[n,,], 1, sd),
-        apply(object$posterior$B[n,,], 1, quantile, probs = 0.05),
-        apply(object$posterior$B[n,,], 1, quantile, probs = 0.95)
+        .interval_bounds(object$posterior$B[n,,], probability, interval)
       )[which_par,],
       ncol = 4
     )
-    colnames(out$B[[n]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$B[[n]]) = c("mean", "sd", .interval_names(probability, interval))
     rownames(out$B[[n]]) = paste0("B[", n, ",", which_par, "]")  
     
     out$A[[n]] = cbind(
       apply(object$posterior$A[n,,], 1, mean),
       apply(object$posterior$A[n,,], 1, sd),
-      apply(object$posterior$A[n,,], 1, quantile, probs = 0.05),
-      apply(object$posterior$A[n,,], 1, quantile, probs = 0.95)
+      .interval_bounds(object$posterior$A[n,,], probability, interval)
     )
-    colnames(out$A[[n]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$A[[n]]) = c("mean", "sd", .interval_names(probability, interval))
     
     Anames  = c(
       paste0(
@@ -484,11 +497,10 @@ summary.PosteriorBSVARMSH = function(
     out$hyper[[i]] = cbind(
       apply(object$posterior$hyper[,i,], 1, mean),
       apply(object$posterior$hyper[,i,], 1, sd),
-      apply(object$posterior$hyper[,i,], 1, quantile, probs = 0.05),
-      apply(object$posterior$hyper[,i,], 1, quantile, probs = 0.95)
+      .interval_bounds(object$posterior$hyper[,i,], probability, interval)
     )
     
-    colnames(out$hyper[[i]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$hyper[[i]]) = c("mean", "sd", .interval_names(probability, interval))
     rownames(out$hyper[[i]]) = c(
       paste0(
         rep(param[i], N),
@@ -511,7 +523,7 @@ summary.PosteriorBSVARMSH = function(
 
 #' @title Provides posterior summary of heteroskedastic Structural VAR estimation
 #'
-#' @description Provides posterior mean, standard deviations, as well as 5 and 95 
+#' @description Provides posterior mean, standard deviations, as well as (by default) 5 and 95
 #' percentiles of the parameters: the structural matrix \eqn{B}, autoregressive 
 #' parameters \eqn{A}, and hyper parameters.
 #' 
@@ -519,9 +531,12 @@ summary.PosteriorBSVARMSH = function(
 #' \code{estimate()} function applied to heteroskedastic Bayesian Structural VAR
 #' model specification set by function \code{specify_bsvar_hmsh$new()} containing 
 #' draws from the  posterior distribution of the parameters. 
+#' @param probability Probability content of the posterior interval.
+#' @param interval Interval type: \code{"equal-tailed"} (the default) or
+#'   \code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.
 #' @param ... additional arguments affecting the summary produced.
 #' 
-#' @return A list reporting the posterior mean, standard deviations, as well as 5 and 95 
+#' @return A list reporting the posterior mean, standard deviations, as well as (by default) 5 and 95
 #' percentiles of the parameters: the structural matrix \eqn{B}, autoregressive 
 #' parameters \eqn{A}, and hyper-parameters.
 #' 
@@ -550,8 +565,11 @@ summary.PosteriorBSVARMSH = function(
 #' @export
 summary.PosteriorBSVARHMSH = function(
     object,
+    probability = 0.9,
+    interval = c("equal-tailed", "hpd"),
     ...
 ) {
+  interval = match.arg(interval)
   
   N         = dim(object$posterior$A)[1]
   p         = object$last_draw$p
@@ -572,21 +590,19 @@ summary.PosteriorBSVARHMSH = function(
       cbind(
         apply(object$posterior$B[n,,], 1, mean),
         apply(object$posterior$B[n,,], 1, sd),
-        apply(object$posterior$B[n,,], 1, quantile, probs = 0.05),
-        apply(object$posterior$B[n,,], 1, quantile, probs = 0.95)
+        .interval_bounds(object$posterior$B[n,,], probability, interval)
       )[which_par,],
       ncol = 4
     )
-    colnames(out$B[[n]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$B[[n]]) = c("mean", "sd", .interval_names(probability, interval))
     rownames(out$B[[n]]) = paste0("B[", n, ",", which_par, "]")  
     
     out$A[[n]] = cbind(
       apply(object$posterior$A[n,,], 1, mean),
       apply(object$posterior$A[n,,], 1, sd),
-      apply(object$posterior$A[n,,], 1, quantile, probs = 0.05),
-      apply(object$posterior$A[n,,], 1, quantile, probs = 0.95)
+      .interval_bounds(object$posterior$A[n,,], probability, interval)
     )
-    colnames(out$A[[n]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$A[[n]]) = c("mean", "sd", .interval_names(probability, interval))
     
     Anames  = c(
       paste0(
@@ -610,11 +626,10 @@ summary.PosteriorBSVARHMSH = function(
     out$hyper[[i]] = cbind(
       apply(object$posterior$hyper[,i,], 1, mean),
       apply(object$posterior$hyper[,i,], 1, sd),
-      apply(object$posterior$hyper[,i,], 1, quantile, probs = 0.05),
-      apply(object$posterior$hyper[,i,], 1, quantile, probs = 0.95)
+      .interval_bounds(object$posterior$hyper[,i,], probability, interval)
     )
     
-    colnames(out$hyper[[i]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$hyper[[i]]) = c("mean", "sd", .interval_names(probability, interval))
     rownames(out$hyper[[i]]) = c(
       paste0(
         rep(param[i], N),
@@ -635,7 +650,7 @@ summary.PosteriorBSVARHMSH = function(
 
 #' @title Provides posterior summary of non-normal Structural VAR estimation
 #'
-#' @description Provides posterior mean, standard deviations, as well as 5 and 95 
+#' @description Provides posterior mean, standard deviations, as well as (by default) 5 and 95
 #' percentiles of the parameters: the structural matrix \eqn{B}, autoregressive 
 #' parameters \eqn{A}, and hyper parameters.
 #' 
@@ -643,9 +658,12 @@ summary.PosteriorBSVARHMSH = function(
 #' \code{estimate()} function applied to non-normal Bayesian Structural VAR
 #' model specification set by function \code{specify_bsvar_mix$new()} containing 
 #' draws from the  posterior distribution of the parameters. 
+#' @param probability Probability content of the posterior interval.
+#' @param interval Interval type: \code{"equal-tailed"} (the default) or
+#'   \code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.
 #' @param ... additional arguments affecting the summary produced.
 #' 
-#' @return A list reporting the posterior mean, standard deviations, as well as 5 and 95 
+#' @return A list reporting the posterior mean, standard deviations, as well as (by default) 5 and 95
 #' percentiles of the parameters: the structural matrix \eqn{B}, autoregressive 
 #' parameters \eqn{A}, and hyper-parameters.
 #' 
@@ -675,8 +693,11 @@ summary.PosteriorBSVARHMSH = function(
 #' @export
 summary.PosteriorBSVARMIX = function(
     object,
+    probability = 0.9,
+    interval = c("equal-tailed", "hpd"),
     ...
 ) {
+  interval = match.arg(interval)
   
   N         = dim(object$posterior$A)[1]
   p         = object$last_draw$p
@@ -697,21 +718,19 @@ summary.PosteriorBSVARMIX = function(
       cbind(
         apply(object$posterior$B[n,,], 1, mean),
         apply(object$posterior$B[n,,], 1, sd),
-        apply(object$posterior$B[n,,], 1, quantile, probs = 0.05),
-        apply(object$posterior$B[n,,], 1, quantile, probs = 0.95)
+        .interval_bounds(object$posterior$B[n,,], probability, interval)
       )[which_par,],
       ncol = 4
     )
-    colnames(out$B[[n]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$B[[n]]) = c("mean", "sd", .interval_names(probability, interval))
     rownames(out$B[[n]]) = paste0("B[", n, ",", which_par, "]")  
     
     out$A[[n]] = cbind(
       apply(object$posterior$A[n,,], 1, mean),
       apply(object$posterior$A[n,,], 1, sd),
-      apply(object$posterior$A[n,,], 1, quantile, probs = 0.05),
-      apply(object$posterior$A[n,,], 1, quantile, probs = 0.95)
+      .interval_bounds(object$posterior$A[n,,], probability, interval)
     )
-    colnames(out$A[[n]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$A[[n]]) = c("mean", "sd", .interval_names(probability, interval))
     
     Anames  = c(
       paste0(
@@ -735,11 +754,10 @@ summary.PosteriorBSVARMIX = function(
     out$hyper[[i]] = cbind(
       apply(object$posterior$hyper[,i,], 1, mean),
       apply(object$posterior$hyper[,i,], 1, sd),
-      apply(object$posterior$hyper[,i,], 1, quantile, probs = 0.05),
-      apply(object$posterior$hyper[,i,], 1, quantile, probs = 0.95)
+      .interval_bounds(object$posterior$hyper[,i,], probability, interval)
     )
     
-    colnames(out$hyper[[i]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$hyper[[i]]) = c("mean", "sd", .interval_names(probability, interval))
     rownames(out$hyper[[i]]) = c(
       paste0(
         rep(param[i], N),
@@ -759,7 +777,7 @@ summary.PosteriorBSVARMIX = function(
 
 #' @title Provides posterior summary of Structural VAR with t-distributed shocks estimation
 #'
-#' @description Provides posterior mean, standard deviations, as well as 5 and 95 
+#' @description Provides posterior mean, standard deviations, as well as (by default) 5 and 95
 #' percentiles of the parameters: the structural matrix \eqn{B}, autoregressive 
 #' parameters \eqn{A}, hyper-parameters, and Student-t degrees-of-freedom 
 #' parameter \eqn{\nu}.
@@ -768,9 +786,12 @@ summary.PosteriorBSVARMIX = function(
 #' \code{estimate()} function applied to homoskedastic Bayesian Structural VAR
 #' model specification set by function \code{specify_bsvar$new()} containing 
 #' draws from the  posterior distribution of the parameters. 
+#' @param probability Probability content of the posterior interval.
+#' @param interval Interval type: \code{"equal-tailed"} (the default) or
+#'   \code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.
 #' @param ... additional arguments affecting the summary produced.
 #' 
-#' @return A list reporting the posterior mean, standard deviations, as well as 5 and 95 
+#' @return A list reporting the posterior mean, standard deviations, as well as (by default) 5 and 95
 #' percentiles of the parameters: the structural matrix \eqn{B}, autoregressive 
 #' parameters \eqn{A}, hyper-parameters, and Student-t degrees-of-freedom 
 #' parameter \eqn{\nu}.
@@ -801,8 +822,11 @@ summary.PosteriorBSVARMIX = function(
 #' @export
 summary.PosteriorBSVART = function(
     object,
+    probability = 0.9,
+    interval = c("equal-tailed", "hpd"),
     ...
 ) {
+  interval = match.arg(interval)
   
   N         = dim(object$posterior$A)[1]
   p         = object$last_draw$p
@@ -823,21 +847,19 @@ summary.PosteriorBSVART = function(
       cbind(
         apply(object$posterior$B[n,,], 1, mean),
         apply(object$posterior$B[n,,], 1, sd),
-        apply(object$posterior$B[n,,], 1, quantile, probs = 0.05),
-        apply(object$posterior$B[n,,], 1, quantile, probs = 0.95)
+        .interval_bounds(object$posterior$B[n,,], probability, interval)
       )[which_par,],
       ncol = 4
     )
-    colnames(out$B[[n]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$B[[n]]) = c("mean", "sd", .interval_names(probability, interval))
     rownames(out$B[[n]]) = paste0("B[", n, ",", which_par, "]")  
     
     out$A[[n]] = cbind(
       apply(object$posterior$A[n,,], 1, mean),
       apply(object$posterior$A[n,,], 1, sd),
-      apply(object$posterior$A[n,,], 1, quantile, probs = 0.05),
-      apply(object$posterior$A[n,,], 1, quantile, probs = 0.95)
+      .interval_bounds(object$posterior$A[n,,], probability, interval)
     )
-    colnames(out$A[[n]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$A[[n]]) = c("mean", "sd", .interval_names(probability, interval))
     
     Anames  = c(
       paste0(
@@ -861,11 +883,10 @@ summary.PosteriorBSVART = function(
     out$hyper[[i]] = cbind(
       apply(object$posterior$hyper[,i,], 1, mean),
       apply(object$posterior$hyper[,i,], 1, sd),
-      apply(object$posterior$hyper[,i,], 1, quantile, probs = 0.05),
-      apply(object$posterior$hyper[,i,], 1, quantile, probs = 0.95)
+      .interval_bounds(object$posterior$hyper[,i,], probability, interval)
     )
     
-    colnames(out$hyper[[i]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out$hyper[[i]]) = c("mean", "sd", .interval_names(probability, interval))
     rownames(out$hyper[[i]]) = c(
       paste0(
         rep(param[i], N),
@@ -881,10 +902,9 @@ summary.PosteriorBSVART = function(
   out$df = c(
     mean(object$posterior$df),
     sd(object$posterior$df),
-    quantile(object$posterior$df, probs = 0.05),
-    quantile(object$posterior$df, probs = 0.95)
+    .interval_bounds(matrix(object$posterior$df, nrow = 1), probability, interval)
   )
-  names(out$df) = c("mean", "sd", "5% quantile", "95% quantile")
+  names(out$df) = c("mean", "sd", .interval_names(probability, interval))
   
   return(out)
 } # END summary.PosteriorBSVART
@@ -899,15 +919,18 @@ summary.PosteriorBSVART = function(
 #'
 #' @description Provides posterior summary of structural shocks' conditional 
 #' standard deviations including their mean, standard deviations, as well as 
-#' 5 and 95 percentiles.
+#' (by default) 5 and 95 percentiles.
 #' 
 #' @param object an object of class PosteriorSigma obtained using the
 #' \code{compute_conditional_sd()} function containing posterior draws of 
 #' conditional standard deviations of structural shocks.
+#' @param probability Probability content of the posterior interval.
+#' @param interval Interval type: \code{"equal-tailed"} (the default) or
+#'   \code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.
 #' @param ... additional arguments affecting the summary produced.
 #' 
 #' @return A list reporting the posterior mean, standard deviations, as well as 
-#' 5 and 95 percentiles of the structural shocks' conditional standard deviations
+#' (by default) 5 and 95 percentiles of the structural shocks' conditional standard deviations
 #' for each of the shocks and periods.
 #' 
 #' @method summary PosteriorSigma
@@ -940,8 +963,11 @@ summary.PosteriorBSVART = function(
 #' @export
 summary.PosteriorSigma = function(
     object,
+    probability = 0.9,
+    interval = c("equal-tailed", "hpd"),
     ...
 ) {
+  interval = match.arg(interval)
   
   stopifnot("The model is homoskedastic. Conditional sd is equal to 1 for all variables and periods." = any(object != 1))
   
@@ -955,9 +981,9 @@ summary.PosteriorSigma = function(
     out[[n]]    = cbind(
       apply(posterior_sigma[n,,], 1, mean),
       apply(posterior_sigma[n,,], 1, sd),
-      t(apply(posterior_sigma[n,,], 1, quantile, probs = c(0.05, 0.95)))
+      .interval_bounds(posterior_sigma[n,,], probability, interval)
     )
-    colnames(out[[n]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out[[n]]) = c("mean", "sd", .interval_names(probability, interval))
     rownames(out[[n]]) = 1:T
   } # END n loop
   
@@ -974,15 +1000,18 @@ summary.PosteriorSigma = function(
 #' @title Provides posterior summary of variables' fitted values
 #'
 #' @description Provides posterior summary of the fitted values including their 
-#' mean, standard deviations, as well as 5 and 95 percentiles.
+#' mean, standard deviations, as well as (by default) 5 and 95 percentiles.
 #' 
 #' @param object an object of class PosteriorFitted obtained using the
 #' \code{compute_fitted_values()} function containing draws the predictive 
 #' density of the sample data. 
+#' @param probability Probability content of the posterior interval.
+#' @param interval Interval type: \code{"equal-tailed"} (the default) or
+#'   \code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.
 #' @param ... additional arguments affecting the summary produced.
 #' 
 #' @return A list reporting the posterior mean, standard deviations, as well as 
-#' 5 and 95 percentiles of the fitted values for each of the shocks and periods.
+#' (by default) 5 and 95 percentiles of the fitted values for each of the shocks and periods.
 #' 
 #' @method summary PosteriorFitted
 #' 
@@ -1013,8 +1042,11 @@ summary.PosteriorSigma = function(
 #' @export
 summary.PosteriorFitted = function(
     object,
+    probability = 0.9,
+    interval = c("equal-tailed", "hpd"),
     ...
 ) {
+  interval = match.arg(interval)
   
   N         = dim(object)[1]
   T         = dim(object)[2]
@@ -1024,9 +1056,9 @@ summary.PosteriorFitted = function(
     out[[n]]    = cbind(
       apply(object[n,,], 1, mean),
       apply(object[n,,], 1, sd),
-      t(apply(object[n,,], 1, quantile, probs = c(0.05, 0.95)))
+      .interval_bounds(object[n,,], probability, interval)
     )
-    colnames(out[[n]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out[[n]]) = c("mean", "sd", .interval_names(probability, interval))
     rownames(out[[n]]) = 1:T
   } # END n loop
   
@@ -1117,15 +1149,18 @@ summary.PosteriorHD = function(
 #'
 #' @description Provides posterior summary of the impulse responses of each 
 #' variable to each of the shocks at all horizons. Includes their posterior 
-#' means, standard deviations, as well as 5 and 95 percentiles.
+#' means, standard deviations, as well as (by default) 5 and 95 percentiles.
 #' 
 #' @param object an object of class PosteriorIR obtained using the
 #' \code{compute_impulse_responses()} function containing draws from the posterior
 #' distribution of the impulse responses. 
+#' @param probability Probability content of the posterior interval.
+#' @param interval Interval type: \code{"equal-tailed"} (the default) or
+#'   \code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.
 #' @param ... additional arguments affecting the summary produced.
 #' 
 #' @return A list reporting the posterior mean, standard deviations, as well as 
-#' 5 and 95 percentiles of the impulse responses of each variable to each of the 
+#' (by default) 5 and 95 percentiles of the impulse responses of each variable to each of the
 #' shocks at all horizons.
 #' 
 #' @method summary PosteriorIR
@@ -1158,8 +1193,11 @@ summary.PosteriorHD = function(
 #' @export
 summary.PosteriorIR = function(
     object,
+    probability = 0.9,
+    interval = c("equal-tailed", "hpd"),
     ...
 ) {
+  interval = match.arg(interval)
   
   N         = dim(object)[1]
   H         = dim(object)[3] - 1
@@ -1173,9 +1211,9 @@ summary.PosteriorIR = function(
       out[[n]][[i]]    = cbind(
         apply(object[i,n,,], 1, mean),
         apply(object[i,n,,], 1, sd),
-        t(apply(object[i,n,,], 1, quantile, probs = c(0.05, 0.95)))
+        .interval_bounds(object[i,n,,], probability, interval)
       )
-      colnames(out[[n]][[i]]) = c("mean", "sd", "5% quantile", "95% quantile")
+      colnames(out[[n]][[i]]) = c("mean", "sd", .interval_names(probability, interval))
       rownames(out[[n]][[i]]) = 0:H
     } # END i loop
     names(out[[n]]) = var_names
@@ -1280,15 +1318,18 @@ summary.PosteriorRegimePr = function(
 #' @title Provides posterior summary of structural shocks
 #'
 #' @description Provides posterior summary of the structural shocks including their 
-#' mean, standard deviations, as well as 5 and 95 percentiles.
+#' mean, standard deviations, as well as (by default) 5 and 95 percentiles.
 #' 
 #' @param object an object of class PosteriorShocks obtained using the
 #' \code{compute_structural_shocks()} function containing draws the posterior
 #' distribution of the structural shocks. 
+#' @param probability Probability content of the posterior interval.
+#' @param interval Interval type: \code{"equal-tailed"} (the default) or
+#'   \code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.
 #' @param ... additional arguments affecting the summary produced.
 #' 
 #' @return A list reporting the posterior mean, standard deviations, as well as 
-#' 5 and 95 percentiles of the structural shocks for each of the equations and periods.
+#' (by default) 5 and 95 percentiles of the structural shocks for each of the equations and periods.
 #' 
 #' @method summary PosteriorShocks
 #' 
@@ -1320,8 +1361,11 @@ summary.PosteriorRegimePr = function(
 #' @export
 summary.PosteriorShocks = function(
     object,
+    probability = 0.9,
+    interval = c("equal-tailed", "hpd"),
     ...
 ) {
+  interval = match.arg(interval)
   
   N         = dim(object)[1]
   T         = dim(object)[2]
@@ -1331,9 +1375,9 @@ summary.PosteriorShocks = function(
     out[[n]]    = cbind(
       apply(object[n,,], 1, mean),
       apply(object[n,,], 1, sd),
-      t(apply(object[n,,], 1, quantile, probs = c(0.05, 0.95)))
+      .interval_bounds(object[n,,], probability, interval)
     )
-    colnames(out[[n]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out[[n]]) = c("mean", "sd", .interval_names(probability, interval))
     rownames(out[[n]]) = 1:T
   } # END n loop
   
@@ -1417,14 +1461,17 @@ summary.PosteriorFEVD = function(
 #' @title Provides posterior summary of Forecasts
 #'
 #' @description Provides posterior summary of the forecasts including their 
-#' mean, standard deviations, as well as 5 and 95 percentiles.
+#' mean, standard deviations, as well as (by default) 5 and 95 percentiles.
 #' 
 #' @param object an object of class Forecasts obtained using the
 #' \code{forecast()} function containing draws the predictive density. 
+#' @param probability Probability content of the posterior interval.
+#' @param interval Interval type: \code{"equal-tailed"} (the default) or
+#'   \code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.
 #' @param ... additional arguments affecting the summary produced.
 #' 
 #' @return A list reporting the posterior mean, standard deviations, as well as 
-#' 5 and 95 percentiles of the forecasts for each of the variables and forecast 
+#' (by default) 5 and 95 percentiles of the forecasts for each of the variables and forecast
 #' horizons.
 #' 
 #' @method summary Forecasts
@@ -1456,8 +1503,11 @@ summary.PosteriorFEVD = function(
 #' @export
 summary.Forecasts = function(
     object,
+    probability = 0.9,
+    interval = c("equal-tailed", "hpd"),
     ...
 ) {
+  interval = match.arg(interval)
   
   N         = dim(object$forecasts)[1]
   H         = dim(object$forecasts)[2]
@@ -1471,9 +1521,9 @@ summary.Forecasts = function(
     out[[n]]    = cbind(
       apply(object$forecasts[n,,], 1, mean),
       apply(object$forecasts[n,,], 1, sd),
-      t(apply(object$forecasts[n,,], 1, quantile, probs = c(0.05, 0.95)))
+      .interval_bounds(object$forecasts[n,,], probability, interval)
     )
-    colnames(out[[n]]) = c("mean", "sd", "5% quantile", "95% quantile")
+    colnames(out[[n]]) = c("mean", "sd", .interval_names(probability, interval))
     rownames(out[[n]]) = 1:H
   } # END n loop
   
