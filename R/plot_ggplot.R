@@ -1,13 +1,12 @@
-.ggplot_summary = function(draws, probability) {
-  stopifnot(is.numeric(probability), length(probability) == 1,
-            probability > 0, probability < 1)
+.ggplot_summary = function(draws, probability, interval) {
+  interval = match.arg(interval, c("equal-tailed", "hpd"))
   margins = seq_len(length(dim(draws)) - 1)
+  bounds = .interval_bounds(matrix(draws, ncol = dim(draws)[length(dim(draws))]),
+                             probability, interval)
   data.frame(
     median = as.vector(apply(draws, margins, stats::median)),
-    lower = as.vector(apply(draws, margins, stats::quantile,
-                            probs = (1 - probability) / 2)),
-    upper = as.vector(apply(draws, margins, stats::quantile,
-                            probs = 1 - (1 - probability) / 2)))
+    lower = bounds[, 1],
+    upper = bounds[, 2])
 }
 
 .ggplot_ribbon = function(data, col, main, xlab, ..., reference = 0) {
@@ -32,11 +31,11 @@
   p
 }
 
-.ggplot_series = function(object, probability, labels, col, main, xlab,
+.ggplot_series = function(object, probability, labels, col, main, xlab, interval,
                             ..., reference = 0) {
   N = dim(object)[1]
   data = expand.grid(series = seq_len(N), position = .ggplot_time(object, 2))
-  data = cbind(data, .ggplot_summary(object, probability))
+  data = cbind(data, .ggplot_summary(object, probability, interval))
   .ggplot_ribbon(data, col, main, xlab, ..., reference = reference) +
     ggplot2::facet_wrap(~ series, ncol = 1, scales = "free_y", strip.position = "left",
       labeller = ggplot2::as_labeller(stats::setNames(labels, seq_len(N))))

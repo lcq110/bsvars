@@ -5,7 +5,9 @@
 #'
 #' @param x A PosteriorIR, PosteriorSigma, PosteriorFitted, PosteriorShocks,
 #'   PosteriorRegimePr, PosteriorFEVD, PosteriorHD, or Forecasts object.
-#' @param probability Probability of the equal-tailed interval.
+#' @param probability Probability of the plotted interval.
+#' @param interval Interval type: \code{"equal-tailed"} (the default) or
+#'   \code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.
 #' @param shock_names Names of the structural shocks.
 #' @param col Colour of the median line and interval ribbon.
 #' @param cols Colours of the shock contributions.
@@ -15,7 +17,7 @@
 #' @param ... Passed to \code{ggplot2::geom_line()}, or to
 #'   \code{ggplot2::geom_area()} for FEVD and HD.
 #' @return A ggplot object, returned invisibly after drawing.
-#' @details Median lines and equal-tailed intervals summarize the input draws;
+#' @details Median lines and posterior intervals summarize the input draws;
 #'   plots use a white classic theme and white facet-label backgrounds by default.
 #'   FEVD and HD use posterior means. Each IR panel has its own y scale.
 #'   HD contributions are connected linearly as areas stacked above and below zero.
@@ -42,12 +44,13 @@ plot2.PosteriorSigma = function(
     col = "#ff69b4",
     main,
     xlab,
-    ...
+    ...,
+    interval = c("equal-tailed", "hpd")
 ) {
   if (missing(main)) main = "Structural Shocks' Conditional Standard Deviations"
   if (missing(xlab)) xlab = "time"
   if (missing(shock_names)) shock_names = paste("shock", seq_len(dim(x)[1]))
-  p = .ggplot_series(x, probability, shock_names, col, main, xlab,
+  p = .ggplot_series(x, probability, shock_names, col, main, xlab, interval = interval,
                    reference = 1, ...)
   .ggplot_draw(p)
 }
@@ -60,12 +63,13 @@ plot2.PosteriorFitted = function(
     col = "#ff69b4",
     main,
     xlab,
-    ...
+    ...,
+    interval = c("equal-tailed", "hpd")
 ) {
   if (missing(main)) main = "Fitted Values of Dependent Variables"
   if (missing(xlab)) xlab = "time"
   p = .ggplot_series(x, probability, .ggplot_labels(x, 1, "variable"),
-                   col, main, xlab, ...)
+                   col, main, xlab, interval = interval, ...)
   .ggplot_draw(p)
 }
 
@@ -78,7 +82,8 @@ plot2.PosteriorIR = function(
     col = "#ff69b4",
     main,
     xlab,
-    ...
+    ...,
+    interval = c("equal-tailed", "hpd")
 ) {
   if (missing(main)) main = if (isTRUE(attr(x, "cumulative"))) "Cumulative Impulse Responses" else "Impulse Responses"
   if (missing(xlab)) xlab = "horizon"
@@ -86,7 +91,7 @@ plot2.PosteriorIR = function(
   if (missing(shock_names)) shock_names = paste("shock", seq_len(N))
   data = expand.grid(variable = seq_len(N), shock = seq_len(N),
                      position = seq_len(dim(x)[3]) - 1)
-  data = cbind(data, .ggplot_summary(x, probability))
+  data = cbind(data, .ggplot_summary(x, probability, interval))
   p = .ggplot_ribbon(data, col, main, xlab, ...) +
     ggh4x::facet_grid2(variable ~ shock, scales = "free_y", independent = "y",
       switch = "y",
@@ -104,7 +109,8 @@ plot2.PosteriorRegimePr = function(
     col = "#ff69b4",
     main,
     xlab,
-    ...
+    ...,
+    interval = c("equal-tailed", "hpd")
 ) {
   if (missing(main)) main = "Regime Probabilities"
   if (missing(xlab)) xlab = "time"
@@ -122,7 +128,7 @@ plot2.PosteriorRegimePr = function(
   }
   data = expand.grid(regime = seq_len(M), position = .ggplot_time(x, 2),
                      process = seq_len(N))
-  data = cbind(data, .ggplot_summary(draws, probability))
+  data = cbind(data, .ggplot_summary(draws, probability, interval))
   p = .ggplot_ribbon(data, col, main, xlab, ..., reference = NULL) +
     ggplot2::scale_y_continuous(limits = c(0, 1)) +
     ggplot2::facet_grid(regime ~ process, switch = "y", labeller = ggplot2::labeller(
@@ -140,12 +146,13 @@ plot2.PosteriorShocks = function(
     col = "#ff69b4",
     main,
     xlab,
-    ...
+    ...,
+    interval = c("equal-tailed", "hpd")
 ) {
   if (missing(main)) main = "Structural Shocks"
   if (missing(xlab)) xlab = "time"
   if (missing(shock_names)) shock_names = paste("shock", seq_len(dim(x)[1]))
-  p = .ggplot_series(x, probability, shock_names, col, main, xlab, ...)
+  p = .ggplot_series(x, probability, shock_names, col, main, xlab, interval = interval, ...)
   .ggplot_draw(p)
 }
 
@@ -158,7 +165,8 @@ plot2.Forecasts = function(
     col = "#ff69b4",
     main,
     xlab,
-    ...
+    ...,
+    interval = c("equal-tailed", "hpd")
 ) {
   if (missing(main)) main = "Forecasting"
   if (missing(xlab)) xlab = "time"
@@ -169,7 +177,7 @@ plot2.Forecasts = function(
   K = max(1, floor(data_in_plot * T))
   H = dim(x$forecasts)[2]
   future = expand.grid(series = seq_len(N), position = K + seq_len(H))
-  future = cbind(future, .ggplot_summary(x$forecasts, probability))
+  future = cbind(future, .ggplot_summary(x$forecasts, probability, interval))
   observed = expand.grid(series = seq_len(N), position = seq_len(K))
   observed$median = as.vector(Y[, seq.int(T - K + 1, T)])
   observed$lower = observed$upper = NA_real_

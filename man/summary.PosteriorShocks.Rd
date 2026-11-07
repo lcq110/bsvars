@@ -4,22 +4,27 @@
 \alias{summary.PosteriorShocks}
 \title{Provides posterior summary of structural shocks}
 \usage{
-\method{summary}{PosteriorShocks}(object, ...)
+\method{summary}{PosteriorShocks}(object, probability = 0.9, interval = c("equal-tailed", "hpd"), ...)
 }
 \arguments{
 \item{object}{an object of class PosteriorShocks obtained using the
 \code{compute_structural_shocks()} function containing draws the posterior
 distribution of the structural shocks.}
 
+\item{probability}{Probability content of the posterior interval.}
+
+\item{interval}{Interval type: \code{"equal-tailed"} (the default) or
+\code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.}
+
 \item{...}{additional arguments affecting the summary produced.}
 }
 \value{
 A list reporting the posterior mean, standard deviations, as well as 
-5 and 95 percentiles of the structural shocks for each of the equations and periods.
+(by default) 5 and 95 percentiles of the structural shocks for each of the equations and periods.
 }
 \description{
 Provides posterior summary of the structural shocks including their 
-mean, standard deviations, as well as 5 and 95 percentiles.
+mean, standard deviations, as well as (by default) 5 and 95 percentiles.
 }
 \examples{
 specification  = specify_bsvar$new(us_fiscal_lsuw)

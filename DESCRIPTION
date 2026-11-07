@@ -51,6 +51,7 @@ Depends:
 Imports: 
     ggplot2,
     ggh4x (>= 0.3.0),
+    coda,
     Rcpp (>= 1.0.7),
     RcppProgress (>= 0.1),
     RcppTN,

@@ -4,7 +4,7 @@
 \alias{summary.PosteriorBSVART}
 \title{Provides posterior summary of Structural VAR with t-distributed shocks estimation}
 \usage{
-\method{summary}{PosteriorBSVART}(object, ...)
+\method{summary}{PosteriorBSVART}(object, probability = 0.9, interval = c("equal-tailed", "hpd"), ...)
 }
 \arguments{
 \item{object}{an object of class PosteriorBSVART obtained using the
@@ -12,16 +12,21 @@
 model specification set by function \code{specify_bsvar$new()} containing 
 draws from the  posterior distribution of the parameters.}
 
+\item{probability}{Probability content of the posterior interval.}
+
+\item{interval}{Interval type: \code{"equal-tailed"} (the default) or
+\code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.}
+
 \item{...}{additional arguments affecting the summary produced.}
 }
 \value{
-A list reporting the posterior mean, standard deviations, as well as 5 and 95 
+A list reporting the posterior mean, standard deviations, as well as (by default) 5 and 95
 percentiles of the parameters: the structural matrix \eqn{B}, autoregressive 
 parameters \eqn{A}, hyper-parameters, and Student-t degrees-of-freedom 
 parameter \eqn{\nu}.
 }
 \description{
-Provides posterior mean, standard deviations, as well as 5 and 95 
+Provides posterior mean, standard deviations, as well as (by default) 5 and 95
 percentiles of the parameters: the structural matrix \eqn{B}, autoregressive 
 parameters \eqn{A}, hyper-parameters, and Student-t degrees-of-freedom 
 parameter \eqn{\nu}.

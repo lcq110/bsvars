@@ -4,22 +4,27 @@
 \alias{summary.PosteriorFitted}
 \title{Provides posterior summary of variables' fitted values}
 \usage{
-\method{summary}{PosteriorFitted}(object, ...)
+\method{summary}{PosteriorFitted}(object, probability = 0.9, interval = c("equal-tailed", "hpd"), ...)
 }
 \arguments{
 \item{object}{an object of class PosteriorFitted obtained using the
 \code{compute_fitted_values()} function containing draws the predictive 
 density of the sample data.}
 
+\item{probability}{Probability content of the posterior interval.}
+
+\item{interval}{Interval type: \code{"equal-tailed"} (the default) or
+\code{"hpd"} for HPD intervals from \code{coda::HPDinterval}.}
+
 \item{...}{additional arguments affecting the summary produced.}
 }
 \value{
 A list reporting the posterior mean, standard deviations, as well as 
-5 and 95 percentiles of the fitted values for each of the shocks and periods.
+(by default) 5 and 95 percentiles of the fitted values for each of the shocks and periods.
 }
 \description{
 Provides posterior summary of the fitted values including their 
-mean, standard deviations, as well as 5 and 95 percentiles.
+mean, standard deviations, as well as (by default) 5 and 95 percentiles.
 }
 \examples{
 specification  = specify_bsvar$new(us_fiscal_lsuw)
