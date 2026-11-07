@@ -117,22 +117,13 @@ arma::field<arma::cube> bsvars_fevd_heterosk (
   
   field<cube>     fevds(S);
   cube            aux_fevds(N, N, horizon);
-  cube            tmp_fevds(N, N, horizon);
   
   for (int s=0; s<S; s++) {
     for (int h=0; h<horizon; h++) {
-      if ( h == 0) {
-        mat diag_sigma2     = diagmat(sigma2_T.col(s));
-        tmp_fevds.slice(h)  = square(posterior_irf(s).slice(h)) * diag_sigma2;
-      } else {
-        mat diag_sigma2     = diagmat(forecast_sigma2.slice(s).col(h - 1));
-        tmp_fevds.slice(h)  = square(posterior_irf(s).slice(h)) * diag_sigma2;
-      }
-      
-      for (int n=0; n<N; n++) {
-        for (int nn=0; nn<N; nn++) {
-          aux_fevds.subcube(n, nn, h, n, nn, h) = accu(tmp_fevds.subcube(n, nn, 0, n, nn, h));
-        }
+      aux_fevds.slice(h).zeros();
+      for (int j=0; j<=h; j++) {
+        vec variance = j == 0 ? sigma2_T.col(s) : forecast_sigma2.slice(s).col(j - 1);
+        aux_fevds.slice(h) += square(posterior_irf(s).slice(h - j)) * diagmat(variance);
       }
       aux_fevds.slice(h)  = diagmat(1/sum(aux_fevds.slice(h), 1)) * aux_fevds.slice(h);
     }
@@ -287,7 +278,7 @@ arma::cube bsvars_filter_forecast_smooth (
     );
     
     if (forecasted) {
-      for_smo_probabilities.slice(s)  = posterior_PR_TR.slice(s) * filtered_probabilities.slice(s);
+      for_smo_probabilities.slice(s)  = posterior_PR_TR.slice(s).t() * filtered_probabilities.slice(s);
     } else if (smoothed) {
       for_smo_probabilities.slice(s)  = smoothing_msh(shocks, posterior_PR_TR.slice(s), filtered_probabilities.slice(s));
     }
@@ -300,6 +291,7 @@ arma::cube bsvars_filter_forecast_smooth (
   
   return out;
 } // END bsvars_filter_forecast_smooth
+
 
 
 
@@ -335,15 +327,15 @@ arma::field<arma::cube> bsvars_filter_forecast_smooth_hmsh (
     cube for_smo(M, T, N);
     for (int n=0; n<N; n++) {
       fp.slice(n)         = filtering_msh(
-        shocks, 
-        posterior_sigma2.slice(s), 
-        posterior_PR_TR(s).slice(n), 
+        shocks.row(n),
+        posterior_sigma2.slice(s).row(n),
+        posterior_PR_TR(s).slice(n),
         posterior_pi_0.slice(s).col(n)
       );
       if (forecasted) {
-        for_smo.slice(n)      = posterior_PR_TR(s).slice(n) * fp.slice(n);
+        for_smo.slice(n)      = posterior_PR_TR(s).slice(n).t() * fp.slice(n);
       } else if (smoothed) {
-        for_smo.slice(n)      = smoothing_msh(shocks, posterior_PR_TR(s).slice(n), fp.slice(n));
+        for_smo.slice(n)      = smoothing_msh(shocks.row(n), posterior_PR_TR(s).slice(n), fp.slice(n));
       }
     } // END n loop
     filtered_probabilities(s) = fp;
@@ -357,4 +349,3 @@ arma::field<arma::cube> bsvars_filter_forecast_smooth_hmsh (
   
   return out;
 } // END bsvars_filter_forecast_smooth
-
