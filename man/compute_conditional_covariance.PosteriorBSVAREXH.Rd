@@ -12,36 +12,24 @@
 }
 \value{
 An object of class \code{PosteriorCovariance}: an
-\code{NxNxTxS} array containing covariance matrices for \code{N} observed
-variables, \code{T} estimation observations (after lags), and \code{S}
-saved posterior draws. Both matrix axes are labelled with the observed
-variable names; the remaining axes have estimation time labels and draw
-indices.
+\code{NxNxTxS} array for \code{N} observed variables, \code{T} estimation
+observations (after lags), and \code{S} saved posterior draws. The axes
+are labelled with variable names, variable names, estimation times,
+and draw indices, respectively.
 }
 \description{
 Computes in-sample posterior draws of the covariance matrices
 of the reduced-form innovations.
 }
 \details{
-For the structural equation \eqn{B\epsilon_t = u_t}, the
-conditional covariance of the reduced-form innovation \eqn{\epsilon_t} is
+For the structural equation \eqn{B\epsilon_t = u_t},
 \deqn{\Sigma_t = B^{-1}\mathrm{diag}(\sigma_t^2)(B^{-1})',}
 where \eqn{\sigma_t} contains the structural shock standard deviations
-returned by \code{compute_conditional_sd()}. The structural matrix and
-standard deviations are taken from the same posterior draw.
-The diagonal of \eqn{\Sigma_t} contains reduced-form innovation variances,
-which generally differ from the structural variances \eqn{\sigma_t^2}.
+returned by \code{compute_conditional_sd()}.
 
-Each covariance matrix is conditional on the parameters and the
-time-specific volatility or regime represented by that draw. These are
-in-sample quantities using posterior states estimated from the full sample,
-not one-step-ahead covariance forecasts. No future-path constraints are
-imposed.
-
-For Student-t shocks, the auxiliary mixing scales \code{lambda} are
-integrated out. Their mean is one, so the same formula applies to normal
-and Student-t specifications. For homoskedastic models,
-\eqn{\Sigma_t = (B'B)^{-1}} at every sample period.
+Each matrix is conditional on the draw's parameters and in-sample
+volatility or regime. For Student-t shocks, the auxiliary mixing scales
+\code{lambda} are integrated out.
 }
 \examples{
 specification = specify_bsvar$new(us_fiscal_lsuw, p = 1)
@@ -51,13 +39,6 @@ covariance    = compute_conditional_covariance(posterior)
 
 # covariance matrix at the first observation and draw
 covariance[, , 1, 1]
-
-# workflow with the pipe |>
-us_fiscal_lsuw |>
-  specify_bsvar$new(p = 1) |>
-  estimate(S = 5) |>
-  estimate(S = 5) |>
-  compute_conditional_covariance() -> covariance
 
 }
 \seealso{
