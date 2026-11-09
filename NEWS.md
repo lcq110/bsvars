@@ -12,6 +12,8 @@ Posterior interval summaries and the ribbons of `plot2()` now accept `interval =
 
 2. New function `compute_cumulative_impulse_responses()` computes posterior draws of cumulative impulse responses as `PosteriorIR` objects that work with `summary()` and `plot2()`; `plot2()` uses the default title "Cumulative Impulse Responses".
 
+3. Added `compute_conditional_covariance()` for in-sample reduced-form innovation covariance matrices.
+
 # bsvars 4.0
 
 1.  The model with Student-t structural shocks features now, an estimated equation-specific degrees-of-freedom parameter, see `specify_bsvar_t()` with verified normality using function `verify_identification()` [#84](https://github.com/bsvars/bsvars/issues/84)
