@@ -87,7 +87,7 @@ summary.PosteriorBSVAR = function(
         rep("lag", p * N),
         kronecker((1:p), rep(1, N)),
         rep("_var", p * N),
-        kronecker((1:N), rep(1, p))
+        rep(1:N, times = p)
       ),
       "const"
     )
@@ -217,7 +217,7 @@ summary.PosteriorBSVARSV = function(
         rep("lag", p * N),
         kronecker((1:p), rep(1, N)),
         rep("_var", p * N),
-        kronecker((1:N), rep(1, p))
+        rep(1:N, times = p)
       ),
       "const"
     )
@@ -349,7 +349,7 @@ summary.PosteriorBSVAREXH = function(
         rep("lag", p * N),
         kronecker((1:p), rep(1, N)),
         rep("_var", p * N),
-        kronecker((1:N), rep(1, p))
+        rep(1:N, times = p)
       ),
       "const"
     )
@@ -480,7 +480,7 @@ summary.PosteriorBSVARMSH = function(
         rep("lag", p * N),
         kronecker((1:p), rep(1, N)),
         rep("_var", p * N),
-        kronecker((1:N), rep(1, p))
+        rep(1:N, times = p)
       ),
       "const"
     )
@@ -609,7 +609,7 @@ summary.PosteriorBSVARHMSH = function(
         rep("lag", p * N),
         kronecker((1:p), rep(1, N)),
         rep("_var", p * N),
-        kronecker((1:N), rep(1, p))
+        rep(1:N, times = p)
       ),
       "const"
     )
@@ -737,7 +737,7 @@ summary.PosteriorBSVARMIX = function(
         rep("lag", p * N),
         kronecker((1:p), rep(1, N)),
         rep("_var", p * N),
-        kronecker((1:N), rep(1, p))
+        rep(1:N, times = p)
       ),
       "const"
     )
@@ -866,7 +866,7 @@ summary.PosteriorBSVART = function(
         rep("lag", p * N),
         kronecker((1:p), rep(1, N)),
         rep("_var", p * N),
-        kronecker((1:N), rep(1, p))
+        rep(1:N, times = p)
       ),
       "const"
     )
